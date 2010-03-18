@@ -4,4 +4,7 @@ CASE-OPPGAVE I BID110 DATAGRAFIKK
   Trening onsdag kl 8.
 - Bruker Github til versjonskontroll
 
--test
+
+
+
+LALALAL
