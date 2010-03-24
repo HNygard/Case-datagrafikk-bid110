@@ -1,13 +1,15 @@
 CASE-OPPGAVE I BID110 DATAGRAFIKK
 
+Gruppen består av:
+- Gunnstein
+- Hallvard
+- Stefan
+
 - Jobbing i datagrafikk-timene, onsdag og torsdag.
   Trening onsdag kl 8.
-- Bruker Github til versjonskontroll
+- Bruker Git og Github til versjonskontroll
 
-
-
-
-LALALAL
-
-
-Hei Gunnstein og Hallvard:D:D:D:D:D:D:D:D:D:D!!!!!!!!
+Ansvar:
+- Scenegraf - Gunnstein
+- Kaffe og Facebook-bilder - Stefan
+- Kode - Hallvard
