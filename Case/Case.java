@@ -10,9 +10,9 @@ import com.sun.j3d.utils.geometry.*;
 import java.applet.*;
 import com.sun.j3d.utils.applet.MainFrame;
 
-public class Labtime6 extends Applet {
+public class Case extends Applet {
   public static void main(String[] args) {
-    new MainFrame(new Labtime6(), 800, 800);
+    new MainFrame(new Case(), 800, 800);
   }	
 
   public void init() {
