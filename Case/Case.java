@@ -8,6 +8,7 @@ import javax.media.j3d.*;
 
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
+
 import java.applet.*;
 import com.sun.j3d.utils.applet.MainFrame;
 
@@ -29,16 +30,19 @@ public class Case extends Applet {
 		su.addBranchGraph(bg);
 	}
 	
-	Shape3D[]         shape;
 	TransformGroup[]  shapeScale;
 	TransformGroup[]  shapeMove;
+	Primitive[]       shapes;
+	Appearance[]      appearance;
+	Material          material;
+	BoundingSphere    bounds;
 
 	private BranchGroup createSceneGraph() {
 		int n = 11;
 		
 		/* root */
 		BranchGroup root = new BranchGroup();
-		BoundingSphere bounds = new BoundingSphere();
+		bounds = new BoundingSphere();
 		
 		/* testTransform */
 		Transform3D tr = new Transform3D();
@@ -58,7 +62,25 @@ public class Case extends Applet {
 				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
 		ptlight.setInfluencingBounds(bounds);
 		root.addChild(ptlight);
-
+		
+		/* Material */
+		material = new Material();
+		
+		/* Making shapes from 0 to n */
+		
+		// Make arrays
+		shapeMove = new TransformGroup[n];
+		shapeScale = new TransformGroup[n];
+		shapes = new Primitive[n];
+		appearance = new Appearance[n];
+		
+		// Make shapes
+		for (int i = 0; i < n; i++) {
+			makeShape(i);
+			root.addChild(shapeMove[i]);
+		}
+		
+		/*
 		SharedGroup sg = new SharedGroup();
 		// object
 		for (int i = 0; i < n; i++) {
@@ -71,8 +93,9 @@ public class Case extends Applet {
 			tgNew.addChild(link);
 			tg.addChild(tgNew);
 
-		}
-
+		}*/
+		
+		/*
 		Shape3D torus1 = new Torus(0.1, 0.7);
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
@@ -91,16 +114,36 @@ public class Case extends Applet {
 
 		TransformGroup tg2 = new TransformGroup(tr2);
 		tg2.addChild(torus2);
+		*/
 
 		// SharedGroup
+		/*
 		sg.addChild(tg2);
-
 		Alpha alpha = new Alpha(0, 8000);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, spin);
 		rotator.setSchedulingBounds(bounds);
 		spin.addChild(rotator);
-
+		*/
 		
 		return root;
+	}
+	
+	public void makeShape (int i)
+	{
+		
+		
+		shapeMove[i] = new TransformGroup();
+		shapeScale[i] = new TransformGroup();
+		
+		// temp
+		Alpha alpha = new Alpha(0, 8000);
+		RotationInterpolator rotator = new RotationInterpolator(alpha, shapeMove[i]);
+		rotator.setSchedulingBounds(bounds);
+		
+		appearance[i] = new Appearance();
+		appearance[i].setMaterial(material);
+		
+		// TODO: random shape
+		shapes[i] = new Box((float) (0.1*i),0,0, appearance[i]);
 	}
 }
