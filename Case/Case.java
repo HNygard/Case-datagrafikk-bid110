@@ -1,6 +1,7 @@
 package Case;
 
 import javax.vecmath.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.media.j3d.*;
@@ -27,20 +28,36 @@ public class Case extends Applet {
 		su.getViewingPlatform().setNominalViewingTransform();
 		su.addBranchGraph(bg);
 	}
+	
+	Shape3D[]         shape;
+	TransformGroup[]  shapeScale;
+	TransformGroup[]  shapeMove;
 
 	private BranchGroup createSceneGraph() {
 		int n = 11;
-
+		
+		/* root */
 		BranchGroup root = new BranchGroup();
-		TransformGroup spin = new TransformGroup();
-		spin.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		root.addChild(spin);
-
+		BoundingSphere bounds = new BoundingSphere();
+		
+		/* testTransform */
 		Transform3D tr = new Transform3D();
-		tr.setScale(0.68);
-		tr.setRotation(new AxisAngle4d(1, 0, 0, Math.PI / 6));
-		TransformGroup tg = new TransformGroup(tr);
-		spin.addChild(tg);
+		tr.setTranslation(new Vector3f(0.1f, 0.1f, 0.1f));
+		TransformGroup testTransform = new TransformGroup(tr);
+		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		root.addChild(testTransform);
+		
+		/* background and lights */
+		Background background = new Background(1.0f, 1.0f, 1.0f);
+		background.setApplicationBounds(bounds);
+		root.addChild(background);
+		AmbientLight light = new AmbientLight(true, new Color3f(Color.white));
+		light.setInfluencingBounds(bounds);
+		root.addChild(light);
+		PointLight ptlight = new PointLight(new Color3f(Color.BLUE),
+				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
+		ptlight.setInfluencingBounds(bounds);
+		root.addChild(ptlight);
 
 		SharedGroup sg = new SharedGroup();
 		// object
@@ -80,21 +97,10 @@ public class Case extends Applet {
 
 		Alpha alpha = new Alpha(0, 8000);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, spin);
-		BoundingSphere bounds = new BoundingSphere();
 		rotator.setSchedulingBounds(bounds);
 		spin.addChild(rotator);
 
-		// background and lights
-		Background background = new Background(1.0f, 1.0f, 1.0f);
-		background.setApplicationBounds(bounds);
-		root.addChild(background);
-		AmbientLight light = new AmbientLight(true, new Color3f(Color.white));
-		light.setInfluencingBounds(bounds);
-		root.addChild(light);
-		PointLight ptlight = new PointLight(new Color3f(Color.BLUE),
-				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
-		ptlight.setInfluencingBounds(bounds);
-		root.addChild(ptlight);
+		
 		return root;
 	}
 }
