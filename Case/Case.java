@@ -10,6 +10,7 @@ import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
 import java.applet.*;
 import com.sun.j3d.utils.applet.MainFrame;
+import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 
 public class Case extends Applet {
 	public static void main(String[] args) {
@@ -26,7 +27,12 @@ public class Case extends Applet {
 		bg.compile();
 		SimpleUniverse su = new SimpleUniverse(cv);
 		su.getViewingPlatform().setNominalViewingTransform();
-		su.addBranchGraph(bg);
+		//Skjermbevegelse
+		OrbitBehavior orbit = new OrbitBehavior(cv);
+	    orbit.setSchedulingBounds(new BoundingSphere());
+	    su.getViewingPlatform().setViewPlatformBehavior(orbit);
+		
+	    su.addBranchGraph(bg);
 	}
 	
 	Shape3D[]         shape;
