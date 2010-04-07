@@ -28,6 +28,7 @@ public class Case extends Applet {
 		bg.compile();
 		SimpleUniverse su = new SimpleUniverse(cv);
 		su.getViewingPlatform().setNominalViewingTransform();
+		
 		//Skjermbevegelse
 		OrbitBehavior orbit = new OrbitBehavior(cv);
 	    orbit.setSchedulingBounds(new BoundingSphere());
@@ -56,9 +57,14 @@ public class Case extends Applet {
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		root.addChild(testTransform);
+		Alpha alpha = new Alpha(0, 8000);
+		RotationInterpolator rotator = new RotationInterpolator(alpha, testTransform);
+		rotator.setSchedulingBounds(bounds);
+		testTransform.addChild(rotator);
 		
 		/* background and lights */
 		Background background = new Background(1.0f, 1.0f, 1.0f);
+		//Background background = new Background(0f, 0f, 0f);
 		background.setApplicationBounds(bounds);
 		root.addChild(background);
 		AmbientLight light = new AmbientLight(true, new Color3f(Color.white));
@@ -72,6 +78,10 @@ public class Case extends Applet {
 		/* Material */
 		material = new Material();
 		
+		// temp
+	    material.setAmbientColor(new Color3f(0f,0f,0f));
+	    material.setDiffuseColor(new Color3f(0.15f,0.15f,0.25f));
+		
 		/* Making shapes from 0 to n */
 		
 		// Make arrays
@@ -83,7 +93,7 @@ public class Case extends Applet {
 		// Make shapes
 		for (int i = 0; i < n; i++) {
 			makeShape(i);
-			root.addChild(shapeMove[i]);
+			testTransform.addChild(shapeMove[i]);
 		}
 		
 		/*
@@ -137,8 +147,9 @@ public class Case extends Applet {
 	public void makeShape (int i)
 	{
 		
-		
-		shapeMove[i] = new TransformGroup();
+		Transform3D tf = new Transform3D();
+		tf.transform(new Point3d(0,0.1*i,0));
+		shapeMove[i] = new TransformGroup(tf);
 		shapeScale[i] = new TransformGroup();
 		
 		// temp
@@ -148,8 +159,13 @@ public class Case extends Applet {
 		
 		appearance[i] = new Appearance();
 		appearance[i].setMaterial(material);
+		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
+				TransparencyAttributes.BLENDED, 0.0f));
 		
 		// TODO: random shape
-		shapes[i] = new Box((float) (0.1*i),0,0, appearance[i]);
+		shapes[i] = new Box(1,1,1, appearance[i]);
+		
+		shapeMove[i].addChild(shapeScale[i]);
+		shapeScale[i].addChild(shapes[i]);
 	}
 }
