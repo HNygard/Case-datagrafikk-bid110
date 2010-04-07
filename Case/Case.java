@@ -49,9 +49,6 @@ public class Case extends Applet {
 		
 		/* root */
 		BranchGroup root = new BranchGroup();
-		TransformGroup spin = new TransformGroup();
-	    spin.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-	    root.addChild(spin);
 		bounds = new BoundingSphere();
 		
 		/* testTransform */
@@ -59,9 +56,8 @@ public class Case extends Applet {
 		tr.setTranslation(new Vector3f(0.1f, 0.1f, 0.1f));
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		spin.addChild(testTransform);
-		//Spin
-		Alpha alpha = new Alpha(-1, 1000);
+		root.addChild(testTransform);
+		Alpha alpha = new Alpha(0, 8000);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, testTransform);
 		rotator.setSchedulingBounds(bounds);
 		testTransform.addChild(rotator);
@@ -158,13 +154,8 @@ public class Case extends Applet {
 		
 		// Oppretter shapeScale
 		shapeScale[i] = new TransformGroup();
-		
-		// temp
-		//Alpha alpha = new Alpha(0, 800);
-		//RotationInterpolator rotator = new RotationInterpolator(alpha, spin);
-		//rotator.setSchedulingBounds(bounds);
-		
-		
+
+
 		appearance[i] = new Appearance();
 		appearance[i].setMaterial(material);
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
@@ -172,5 +163,46 @@ public class Case extends Applet {
 		
 		shapeMove[i].addChild(shapeScale[i]);
 		shapeScale[i].addChild(shapes[i]);
+		
+		// Oppretter RotPosScalIntepolator
+		 Alpha alpha = new Alpha(-1, 10000);
+		    TransformGroup target = new TransformGroup();
+		    Transform3D axisOfRotPos = new Transform3D();
+		    float[] knots = { 0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.6f, 0.8f, 0.9f, 1.0f };
+		    Quat4f[] quats = new Quat4f[9];
+		    Point3f[] positions = new Point3f[9];
+
+		    target.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+
+		    AxisAngle4f axis = new AxisAngle4f(1.0f, 0.0f, 0.0f, 0.0f);
+		    axisOfRotPos.set(axis);
+
+		    quats[0] = new Quat4f(0.0f, 1.0f, 1.0f, 0.0f);
+		    quats[1] = new Quat4f(1.0f, 0.0f, 0.0f, 0.0f);
+		    quats[2] = new Quat4f(0.0f, 1.0f, 0.0f, 0.0f);
+		    quats[3] = new Quat4f(0.0f, 1.0f, 1.0f, 0.0f);
+		    quats[4] = new Quat4f(0.0f, 0.0f, 1.0f, 0.0f);
+		    quats[5] = new Quat4f(0.0f, 1.0f, 1.0f, 0.0f);
+		    quats[6] = new Quat4f(1.0f, 1.0f, 0.0f, 0.0f);
+		    quats[7] = new Quat4f(1.0f, 0.0f, 0.0f, 0.0f);
+		    quats[8] = quats[0];
+
+		    positions[0] = new Point3f(0.0f, 0.0f, -1.0f);
+		    positions[1] = new Point3f(1.0f, -1.0f, -2.0f);
+		    positions[2] = new Point3f(-1.0f, 1.0f, -3.0f);
+		    positions[3] = new Point3f(2.0f, 0.0f, -4.0f);
+		    positions[4] = new Point3f(-2.0f, -1.0f, -5.0f);
+		    positions[5] = new Point3f(3.0f, 1.0f, -6.0f);
+		    positions[6] = new Point3f(-3.0f, 0.0f, -7.0f);
+		    positions[7] = new Point3f(2.0f, -1.0f, -4.0f);
+		    positions[8] = positions[0];
+
+		    // Create a RotPosPathInterpolator object
+		    RotPosPathInterpolator rotPosPath = new RotPosPathInterpolator(alpha,
+		        target, axisOfRotPos, knots, quats, positions);
+		    rotPosPath.setSchedulingBounds(new BoundingSphere());
+
+		
+		
 	}
 }
