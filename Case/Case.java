@@ -165,7 +165,7 @@ public class Case extends Applet {
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
 		
-		//shapeMove[i].addChild(shapeScale[i]);
+		shapeMove[i].addChild(shapeScale[i]);
 		shapeScale[i].addChild(shapes[i]);
 		
 		// Oppretter RotPosScalIntepolator
@@ -215,6 +215,5 @@ public class Case extends Applet {
 				shapeMove[i], axisOfRotPos, knots, quats, positions);
 		rotPosPath.setSchedulingBounds(bounds);
 		shapeMove[i].addChild(rotPosPath);
-		shapeMove[i].addChild(shapeScale[i]);
 	}
 }
