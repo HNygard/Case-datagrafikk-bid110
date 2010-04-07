@@ -8,6 +8,7 @@ import javax.media.j3d.*;
 
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
+
 import java.applet.*;
 import com.sun.j3d.utils.applet.MainFrame;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
@@ -27,6 +28,7 @@ public class Case extends Applet {
 		bg.compile();
 		SimpleUniverse su = new SimpleUniverse(cv);
 		su.getViewingPlatform().setNominalViewingTransform();
+		
 		//Skjermbevegelse
 		OrbitBehavior orbit = new OrbitBehavior(cv);
 	    orbit.setSchedulingBounds(new BoundingSphere());
@@ -35,16 +37,19 @@ public class Case extends Applet {
 	    su.addBranchGraph(bg);
 	}
 	
-	Shape3D[]         shape;
 	TransformGroup[]  shapeScale;
 	TransformGroup[]  shapeMove;
+	Primitive[]       shapes;
+	Appearance[]      appearance;
+	Material          material;
+	BoundingSphere    bounds;
 
 	private BranchGroup createSceneGraph() {
 		int n = 11;
 		
 		/* root */
 		BranchGroup root = new BranchGroup();
-		BoundingSphere bounds = new BoundingSphere();
+		bounds = new BoundingSphere();
 		
 		/* testTransform */
 		Transform3D tr = new Transform3D();
@@ -52,9 +57,14 @@ public class Case extends Applet {
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		root.addChild(testTransform);
+		Alpha alpha = new Alpha(0, 8000);
+		RotationInterpolator rotator = new RotationInterpolator(alpha, testTransform);
+		rotator.setSchedulingBounds(bounds);
+		testTransform.addChild(rotator);
 		
 		/* background and lights */
 		Background background = new Background(1.0f, 1.0f, 1.0f);
+		//Background background = new Background(0f, 0f, 0f);
 		background.setApplicationBounds(bounds);
 		root.addChild(background);
 		AmbientLight light = new AmbientLight(true, new Color3f(Color.white));
@@ -64,7 +74,29 @@ public class Case extends Applet {
 				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
 		ptlight.setInfluencingBounds(bounds);
 		root.addChild(ptlight);
-
+		
+		/* Material */
+		material = new Material();
+		
+		// temp
+	    material.setAmbientColor(new Color3f(0f,0f,0f));
+	    material.setDiffuseColor(new Color3f(0.15f,0.15f,0.25f));
+		
+		/* Making shapes from 0 to n */
+		
+		// Make arrays
+		shapeMove = new TransformGroup[n];
+		shapeScale = new TransformGroup[n];
+		shapes = new Primitive[n];
+		appearance = new Appearance[n];
+		
+		// Make shapes
+		for (int i = 0; i < n; i++) {
+			makeShape(i);
+			testTransform.addChild(shapeMove[i]);
+		}
+		
+		/*
 		SharedGroup sg = new SharedGroup();
 		// object
 		for (int i = 0; i < n; i++) {
@@ -77,8 +109,9 @@ public class Case extends Applet {
 			tgNew.addChild(link);
 			tg.addChild(tgNew);
 
-		}
-
+		}*/
+		
+		/*
 		Shape3D torus1 = new Torus(0.1, 0.7);
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
@@ -97,16 +130,42 @@ public class Case extends Applet {
 
 		TransformGroup tg2 = new TransformGroup(tr2);
 		tg2.addChild(torus2);
+		*/
 
 		// SharedGroup
+		/*
 		sg.addChild(tg2);
-
 		Alpha alpha = new Alpha(0, 8000);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, spin);
 		rotator.setSchedulingBounds(bounds);
 		spin.addChild(rotator);
-		
+		*/
 		
 		return root;
+	}
+	
+	public void makeShape (int i)
+	{
+		// Oppretter shape
+		shapes[i] = new Box(0.05f,0.05f,0.05f, appearance[i]);
+		
+		// Oppretter shapeMove
+		shapeMove[i] = new TransformGroup();
+		
+		// Oppretter shapeScale
+		shapeScale[i] = new TransformGroup();
+		
+		// temp
+		Alpha alpha = new Alpha(0, 800);
+		RotationInterpolator rotator = new RotationInterpolator(alpha, shapeMove[i]);
+		rotator.setSchedulingBounds(bounds);
+		
+		appearance[i] = new Appearance();
+		appearance[i].setMaterial(material);
+		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
+				TransparencyAttributes.BLENDED, 0.0f));
+		
+		shapeMove[i].addChild(shapeScale[i]);
+		shapeScale[i].addChild(shapes[i]);
 	}
 }
