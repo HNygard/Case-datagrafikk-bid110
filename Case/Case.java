@@ -146,14 +146,17 @@ public class Case extends Applet {
 	
 	public void makeShape (int i)
 	{
+		// Oppretter shape
+		shapes[i] = new Box(0.05f,0.05f,0.05f, appearance[i]);
 		
-		Transform3D tf = new Transform3D();
-		tf.transform(new Point3d(0,0.1*i,0));
-		shapeMove[i] = new TransformGroup(tf);
+		// Oppretter shapeMove
+		shapeMove[i] = new TransformGroup();
+		
+		// Oppretter shapeScale
 		shapeScale[i] = new TransformGroup();
 		
 		// temp
-		Alpha alpha = new Alpha(0, 8000);
+		Alpha alpha = new Alpha(0, 800);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, shapeMove[i]);
 		rotator.setSchedulingBounds(bounds);
 		
@@ -161,9 +164,6 @@ public class Case extends Applet {
 		appearance[i].setMaterial(material);
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
-		
-		// TODO: random shape
-		shapes[i] = new Box(1,1,1, appearance[i]);
 		
 		shapeMove[i].addChild(shapeScale[i]);
 		shapeScale[i].addChild(shapes[i]);
