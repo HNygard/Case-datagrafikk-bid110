@@ -57,8 +57,8 @@ public class Case extends Applet {
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		//Spin
-		Alpha alpha = new Alpha(-1, 4000);
 		root.addChild(testTransform);
+		Alpha alpha = new Alpha(0, 8000);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, testTransform);
 		rotator.setSchedulingBounds(bounds);
 		testTransform.addChild(rotator);
@@ -147,9 +147,13 @@ public class Case extends Applet {
 	
 	public void makeShape (int i)
 	{
-		// Oppretter shape
-		shapes[i] = new Box(0.05f,0.05f,0.05f, appearance[i]);
+		System.out.println("Oppretter shape " + i);
 		
+		// Oppretter shape
+		shapes[i] = new Box((float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()), appearance[i]);
+
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
 		
@@ -162,11 +166,11 @@ public class Case extends Applet {
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
 		
-		shapeMove[i].addChild(shapeScale[i]);
+		//shapeMove[i].addChild(shapeScale[i]);
 		shapeScale[i].addChild(shapes[i]);
 		
 		// Oppretter RotPosScalIntepolator
-		Alpha alpha = new Alpha(-1, 10000);
+		Alpha alpha = new Alpha(-1, 8000);
 		Transform3D axisOfRotPos = new Transform3D();
 		float[] knots = { 0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.6f, 0.8f, 0.9f, 1.0f };
 		Quat4f[] quats = new Quat4f[9];
@@ -187,6 +191,16 @@ public class Case extends Applet {
 		quats[7] = new Quat4f(1.0f, 0.0f, 0.0f, 0.0f);
 		quats[8] = quats[0];
 		
+		/*
+		positions[0] = new Point3f(0.0f, 0.0f, (float)(-1.0f*Math.random()));
+		positions[1] = new Point3f(1.0f, -1.0f, (float)(-2.0f*Math.random()));
+		positions[2] = new Point3f(-1.0f, 1.0f, (float)(-3.0f*Math.random()));
+		positions[3] = new Point3f(2.0f, 0.0f, (float)(-4.0f*Math.random()));
+		positions[4] = new Point3f(-2.0f, -1.0f, (float)(-5.0f*Math.random()));
+		positions[5] = new Point3f(3.0f, 1.0f, (float)(-6.0f*Math.random()));
+		positions[6] = new Point3f(-3.0f, 0.0f, (float)(-7.0f*Math.random()));
+		positions[7] = new Point3f(2.0f, -1.0f, (float)(-4.0f*Math.random()));
+		*/
 		positions[0] = new Point3f(0.0f, 0.0f, -1.0f);
 		positions[1] = new Point3f(1.0f, -1.0f, -2.0f);
 		positions[2] = new Point3f(-1.0f, 1.0f, -3.0f);
@@ -200,6 +214,8 @@ public class Case extends Applet {
 		// Create a RotPosPathInterpolator object
 		RotPosPathInterpolator rotPosPath = new RotPosPathInterpolator(alpha,
 				shapeMove[i], axisOfRotPos, knots, quats, positions);
-		rotPosPath.setSchedulingBounds(new BoundingSphere());
+		rotPosPath.setSchedulingBounds(bounds);
+		shapeMove[i].addChild(rotPosPath);
+		shapeMove[i].addChild(shapeScale[i]);
 	}
 }
