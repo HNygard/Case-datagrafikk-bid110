@@ -49,6 +49,9 @@ public class Case extends Applet {
 		
 		/* root */
 		BranchGroup root = new BranchGroup();
+		TransformGroup spin = new TransformGroup();
+	    spin.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+	    root.addChild(spin);
 		bounds = new BoundingSphere();
 		
 		/* testTransform */
@@ -56,8 +59,9 @@ public class Case extends Applet {
 		tr.setTranslation(new Vector3f(0.1f, 0.1f, 0.1f));
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		root.addChild(testTransform);
-		Alpha alpha = new Alpha(0, 8000);
+		spin.addChild(testTransform);
+		//Spin
+		Alpha alpha = new Alpha(-1, 1000);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, testTransform);
 		rotator.setSchedulingBounds(bounds);
 		testTransform.addChild(rotator);
@@ -156,9 +160,10 @@ public class Case extends Applet {
 		shapeScale[i] = new TransformGroup();
 		
 		// temp
-		Alpha alpha = new Alpha(0, 800);
-		RotationInterpolator rotator = new RotationInterpolator(alpha, shapeMove[i]);
-		rotator.setSchedulingBounds(bounds);
+		//Alpha alpha = new Alpha(0, 800);
+		//RotationInterpolator rotator = new RotationInterpolator(alpha, spin);
+		//rotator.setSchedulingBounds(bounds);
+		
 		
 		appearance[i] = new Appearance();
 		appearance[i].setMaterial(material);
