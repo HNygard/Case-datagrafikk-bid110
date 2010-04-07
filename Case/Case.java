@@ -105,7 +105,7 @@ public class Case extends Applet {
 		RotationInterpolator rotator = new RotationInterpolator(alpha, spin);
 		rotator.setSchedulingBounds(bounds);
 		spin.addChild(rotator);
-
+		
 		
 		return root;
 	}
