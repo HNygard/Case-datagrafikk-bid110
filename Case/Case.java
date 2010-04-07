@@ -61,7 +61,7 @@ public class Case extends Applet {
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		spin.addChild(testTransform);
 		//Spin
-		Alpha alpha = new Alpha(-1, 1000);
+		Alpha alpha = new Alpha(-1, 4000);
 		RotationInterpolator rotator = new RotationInterpolator(alpha, testTransform);
 		rotator.setSchedulingBounds(bounds);
 		testTransform.addChild(rotator);
