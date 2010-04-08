@@ -144,7 +144,7 @@ public class Case extends Applet {
 	
 	public void makeShape (int i)
 	{
-		System.out.println("Oppretter shape " + i);
+		//System.out.println("Oppretter shape " + i);
 		
 		// Oppretter shape
 		shapes[i] = new Box((float) (0.05f * Math.random()),
