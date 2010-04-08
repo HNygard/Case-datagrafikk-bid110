@@ -8,8 +8,11 @@ import javax.media.j3d.*;
 
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
+import com.sun.j3d.utils.image.TextureLoader;
 
 import java.applet.*;
+import java.net.URL;
+
 import com.sun.j3d.utils.applet.MainFrame;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 
@@ -161,7 +164,7 @@ public class Case extends Applet {
 		shapeScale[i] = new TransformGroup();
 
 
-		appearance[i] = new Appearance();
+		appearance[i] = createAppearance();
 		appearance[i].setMaterial(material);
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
@@ -213,5 +216,20 @@ public class Case extends Applet {
 				shapeMove[i], axisOfRotPos, knots, quats, positions);
 		rotPosPath.setSchedulingBounds(bounds);
 		shapeMove[i].addChild(rotPosPath);
+	}
+
+	 Appearance createAppearance() {
+		Appearance appear = new Appearance();
+		URL filename = getClass().getClassLoader().getResource("images/earth.jpg");
+	    TextureLoader loader = new TextureLoader(filename, this);
+	    ImageComponent2D image = loader.getImage();
+	    Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
+	    	    image.getWidth(), image.getHeight());
+	    	    texture.setImage(0, image);
+	    	    texture.setEnable(true);    
+	    	    texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
+	    	    texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
+	    	    appear.setTexture(texture);
+	    	    return appear;
 	}
 }
