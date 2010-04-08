@@ -170,7 +170,7 @@ public class Case extends Applet {
 		shapeScale[i].addChild(shapes[i]);
 		
 		// Oppretter RotPosScalIntepolator
-		Alpha alpha = new Alpha(-1, 800);
+		Alpha alpha = new Alpha(-1, 8000);
 		Transform3D axisOfRotPos = new Transform3D();
 		float[] knots = { 0.0f, 0.3f, 0.5f, 0.7f, 1.0f };
 		Quat4f[] quats = new Quat4f[5];
@@ -186,14 +186,27 @@ public class Case extends Applet {
 		quats[2] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[3] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[4] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
-		//quats[8] = quats[0];
 		
-		positions[0] = new Point3f(0.0f, 0.0f, 0.0f);
-		positions[1] = new Point3f(0.3f, 0.3f, 0.0f);
-		positions[2] = new Point3f(0.6f, 0.6f, 0.0f);
-		positions[3] = new Point3f(0.8f, 0.8f, 0.0f);
-		positions[4] = new Point3f(1.0f, 1.0f, 0.0f);
-		//positions[8] = positions[0];
+		float avstand_ytre  = 0.5f;
+		float avstand_indre = 0.2f;
+		double theta = Math.random()* 2 * Math.PI;
+		positions[0] = new Point3f(
+				(float) (-avstand_ytre * Math.cos(theta)),
+				(float) (-avstand_ytre * Math.sin(theta)),
+				0.0f);
+		positions[1] = new Point3f(
+				(float) (-avstand_indre * Math.cos(theta)),
+				(float) (-avstand_indre * Math.sin(theta)),
+				0.0f);
+		positions[2] = new Point3f(0.0f, 0.0f, 0.0f);
+		positions[3] = new Point3f(
+				(float) (avstand_indre * Math.cos(theta)),
+				(float) (avstand_indre * Math.sin(theta)),
+				0.0f);
+		positions[4] = new Point3f(
+				(float) (avstand_ytre * Math.cos(theta)),
+				(float) (avstand_ytre * Math.sin(theta)),
+				0.0f);
 		
 		// Create a RotPosPathInterpolator object
 		RotPosPathInterpolator rotPosPath = new RotPosPathInterpolator(alpha,
