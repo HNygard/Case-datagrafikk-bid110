@@ -208,7 +208,6 @@ public class Case extends Applet {
 				(float) (avstand_ytre * Math.sin(theta)),
 				0.0f);
 		
-	
 		
 		// Create a RotPosPathInterpolator object RotPosScalePathInterpolator
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
