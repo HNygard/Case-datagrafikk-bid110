@@ -172,12 +172,13 @@ public class Case extends Applet {
 		shapeMove[i].addChild(shapeScale[i]);
 		shapeScale[i].addChild(shapes[i]);
 		
-		// Oppretter RotPosScalIntepolator
+		// Oppretter RotPosScaleIntepolator
 		Alpha alpha = new Alpha(-1, 8000);
 		Transform3D axisOfRotPos = new Transform3D();
 		float[] knots = { 0.0f, 0.3f, 0.5f, 0.7f, 1.0f };
 		Quat4f[] quats = new Quat4f[5];
 		Point3f[] positions = new Point3f[5];
+		float[] scales = {0.4f, 0.4f, 2.0f, 0.4f, 0.4f};
 		
 		shapeMove[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
@@ -211,11 +212,13 @@ public class Case extends Applet {
 				(float) (avstand_ytre * Math.sin(theta)),
 				0.0f);
 		
-		// Create a RotPosPathInterpolator object
-		RotPosPathInterpolator rotPosPath = new RotPosPathInterpolator(alpha,
-				shapeMove[i], axisOfRotPos, knots, quats, positions);
-		rotPosPath.setSchedulingBounds(bounds);
-		shapeMove[i].addChild(rotPosPath);
+	
+		
+		// Create a RotPosPathInterpolator object RotPosScalePathInterpolator
+		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
+				shapeMove[i], axisOfRotPos, knots, quats, positions, scales);
+		rotPosScalePath.setSchedulingBounds(bounds);
+		shapeMove[i].addChild(rotPosScalePath);
 	}
 
 	 Appearance createAppearance() {
