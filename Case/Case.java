@@ -37,7 +37,6 @@ public class Case extends Applet {
 	    su.addBranchGraph(bg);
 	}
 	
-	TransformGroup[]  shapeScale;
 	TransformGroup[]  shapeMove;
 	Primitive[]       shapes;
 	Appearance[]      appearance;
@@ -86,7 +85,6 @@ public class Case extends Applet {
 		
 		// Make arrays
 		shapeMove = new TransformGroup[n];
-		shapeScale = new TransformGroup[n];
 		shapes = new Primitive[n];
 		appearance = new Appearance[n];
 		
@@ -155,9 +153,6 @@ public class Case extends Applet {
 
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
-		
-		// Oppretter shapeScale
-		shapeScale[i] = new TransformGroup();
 
 
 		appearance[i] = new Appearance();
@@ -165,8 +160,7 @@ public class Case extends Applet {
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
 		
-		shapeMove[i].addChild(shapeScale[i]);
-		shapeScale[i].addChild(shapes[i]);
+		shapeMove[i].addChild(shapes[i]);
 		
 		// Oppretter RotPosScaleIntepolator
 		Alpha alpha = new Alpha(-1, 8000);
