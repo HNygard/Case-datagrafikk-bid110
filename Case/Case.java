@@ -160,7 +160,7 @@ public class Case extends Applet {
 
 
 		appearance[i] = createAppearance();
-		appearance[i].setMaterial(material);
+		//appearance[i].setMaterial(material);
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
 		
@@ -213,19 +213,20 @@ public class Case extends Applet {
 		rotPosScalePath.setSchedulingBounds(bounds);
 		shapeMove[i].addChild(rotPosScalePath);
 	}
-
-	 Appearance createAppearance() {
+	
+	public Appearance createAppearance() {
 		Appearance appear = new Appearance();
-		URL filename = getClass().getClassLoader().getResource("images/earth.jpg");
-	    TextureLoader loader = new TextureLoader(filename, this);
-	    ImageComponent2D image = loader.getImage();
-	    Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
-	    	    image.getWidth(), image.getHeight());
-	    	    texture.setImage(0, image);
-	    	    texture.setEnable(true);    
-	    	    texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-	    	    texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
-	    	    appear.setTexture(texture);
-	    	    return appear;
+		URL filename = getClass().getClassLoader().getResource(
+				"images/earth.jpg");
+		TextureLoader loader = new TextureLoader(filename, this);
+		ImageComponent2D image = loader.getImage();
+		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
+				image.getWidth(), image.getHeight());
+		texture.setImage(0, image);
+		texture.setEnable(true);
+		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
+		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
+		appear.setTexture(texture);
+		return appear;
 	}
 }
