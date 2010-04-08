@@ -40,7 +40,6 @@ public class Case extends Applet {
 	    su.addBranchGraph(bg);
 	}
 	
-	TransformGroup[]  shapeScale;
 	TransformGroup[]  shapeMove;
 	Primitive[]       shapes;
 	Appearance[]      appearance;
@@ -90,7 +89,6 @@ public class Case extends Applet {
 		
 		// Make arrays
 		shapeMove = new TransformGroup[n];
-		shapeScale = new TransformGroup[n];
 		shapes = new Primitive[n];
 		appearance = new Appearance[n];
 		
@@ -150,7 +148,7 @@ public class Case extends Applet {
 	
 	public void makeShape (int i)
 	{
-		System.out.println("Oppretter shape " + i);
+		//System.out.println("Oppretter shape " + i);
 		
 		// Oppretter shape
 		shapes[i] = new Box((float) (0.05f * Math.random()),
@@ -159,18 +157,14 @@ public class Case extends Applet {
 
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
-		
-		// Oppretter shapeScale
-		shapeScale[i] = new TransformGroup();
 
 
 		appearance[i] = createAppearance();
-		appearance[i].setMaterial(material);
+		//appearance[i].setMaterial(material);
 		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
 		
-		shapeMove[i].addChild(shapeScale[i]);
-		shapeScale[i].addChild(shapes[i]);
+		shapeMove[i].addChild(shapes[i]);
 		
 		// Oppretter RotPosScaleIntepolator
 		Alpha alpha = new Alpha(-1, 8000);
@@ -212,7 +206,6 @@ public class Case extends Applet {
 				(float) (avstand_ytre * Math.sin(theta)),
 				0.0f);
 		
-	
 		
 		// Create a RotPosPathInterpolator object RotPosScalePathInterpolator
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
@@ -220,19 +213,20 @@ public class Case extends Applet {
 		rotPosScalePath.setSchedulingBounds(bounds);
 		shapeMove[i].addChild(rotPosScalePath);
 	}
-
-	 Appearance createAppearance() {
+	
+	public Appearance createAppearance() {
 		Appearance appear = new Appearance();
-		URL filename = getClass().getClassLoader().getResource("images/earth.jpg");
-	    TextureLoader loader = new TextureLoader(filename, this);
-	    ImageComponent2D image = loader.getImage();
-	    Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
-	    	    image.getWidth(), image.getHeight());
-	    	    texture.setImage(0, image);
-	    	    texture.setEnable(true);    
-	    	    texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-	    	    texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
-	    	    appear.setTexture(texture);
-	    	    return appear;
+		URL filename = getClass().getClassLoader().getResource(
+				"images/earth.jpg");
+		TextureLoader loader = new TextureLoader(filename, this);
+		ImageComponent2D image = loader.getImage();
+		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
+				image.getWidth(), image.getHeight());
+		texture.setImage(0, image);
+		texture.setEnable(true);
+		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
+		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
+		appear.setTexture(texture);
+		return appear;
 	}
 }
