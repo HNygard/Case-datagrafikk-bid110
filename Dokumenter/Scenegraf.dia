@@ -2141,7 +2141,7 @@ Sekretøs lager
         <dia:point val="15.0054,19.6394"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="14.6836,16.9566;15.3454,19.69"/>
+        <dia:rectangle val="14.6836,16.9566;15.3453,19.6901"/>
       </dia:attribute>
       <dia:attribute name="conn_endpoints">
         <dia:point val="15.0054,19.6394"/>
@@ -2171,7 +2171,7 @@ Sekretøs lager
         <dia:point val="20.6896,16.9892"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="20.4057,16.9382;21.0674,20.0211"/>
+        <dia:rectangle val="20.4058,16.9382;21.0674,20.0211"/>
       </dia:attribute>
       <dia:attribute name="conn_endpoints">
         <dia:point val="20.6896,16.9892"/>
@@ -2346,7 +2346,7 @@ apperance[1]#</dia:string>
         <dia:point val="17.8682,23.5622"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="17.7991,21.6505;20.8165,23.6313"/>
+        <dia:rectangle val="17.7991,21.6505;20.8166,23.6313"/>
       </dia:attribute>
       <dia:attribute name="conn_endpoints">
         <dia:point val="17.8682,23.5622"/>
