@@ -149,6 +149,10 @@ public class Case extends Applet {
 	public void makeShape (int i)
 	{
 		//System.out.println("Oppretter shape " + i);
+		appearance[i] = createAppearance();
+		appearance[i].setMaterial(material);
+		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
+				TransparencyAttributes.BLENDED, 0.0f));
 		
 		// Oppretter shape
 		shapes[i] = new Box((float) (0.05f * Math.random()),
@@ -159,10 +163,8 @@ public class Case extends Applet {
 		shapeMove[i] = new TransformGroup();
 
 
-		appearance[i] = createAppearance();
-		//appearance[i].setMaterial(material);
-		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
-				TransparencyAttributes.BLENDED, 0.0f));
+		
+		
 		
 		shapeMove[i].addChild(shapes[i]);
 		
