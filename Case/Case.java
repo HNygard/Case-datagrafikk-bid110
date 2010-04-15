@@ -5,6 +5,7 @@ import javax.vecmath.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.media.j3d.*;
+import javax.print.attribute.standard.SheetCollate;
 
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
@@ -12,6 +13,7 @@ import com.sun.j3d.utils.image.TextureLoader;
 
 import java.applet.*;
 import java.net.URL;
+import java.util.Enumeration;
 
 import com.sun.j3d.utils.applet.MainFrame;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
@@ -232,5 +234,31 @@ public class Case extends Applet {
 		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
 		appear.setTexture(texture);
 		return appear;
+	}
+	
+	public class CaseBehavior extends Behavior 
+	{
+		Primitive shape;
+		public CaseBehavior (Primitive shape)
+		{
+			this.shape = shape;
+		}
+
+		@Override
+		public void initialize()
+		{
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime(1000));
+		}
+
+		@Override
+		public void processStimulus(Enumeration arg0)
+		{
+			shape = makeShape2();
+			
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime(1000));
+		}
+		
 	}
 }
