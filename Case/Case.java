@@ -102,7 +102,7 @@ public class Case extends Applet {
 		
 		// Make shapes
 		for (int i = 0; i < n; i++) {
-			makeShape(i);
+			makeShapes(i);
 			testTransform.addChild(shapeMove[i]);
 		}
 		
@@ -154,7 +154,7 @@ public class Case extends Applet {
 		return root;
 	}
 	
-	public void makeShape (int i)
+	public void makeShapes (int i)
 	{
 		//System.out.println("Oppretter shape " + i);
 		appearance[i] = createAppearance();
@@ -227,6 +227,11 @@ public class Case extends Applet {
 		shapeMove[i].addChild(rotPosScalePath);
 	}
 	
+	public Primitive makeShape ()
+	{
+		return null;
+	}
+	
 	public Appearance createAppearance() {
 		Appearance appear = new Appearance();
 		URL filename = getClass().getClassLoader().getResource(
@@ -261,7 +266,7 @@ public class Case extends Applet {
 		@Override
 		public void processStimulus(Enumeration arg0)
 		{
-			shape = makeShape2();
+			shape = makeShape();
 			
 			// Time for testing purpose
 			wakeupOn(new WakeupOnElapsedTime(1000));
