@@ -58,6 +58,8 @@ public class Case extends Applet {
 		tr.setTranslation(new Vector3f(0.1f, 0.1f, 0.1f));
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+
+		
 		//Spin
 		root.addChild(testTransform);
 		Alpha alpha = new Alpha(0, 8000);
