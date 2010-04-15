@@ -7,6 +7,8 @@ import java.awt.event.*;
 import javax.media.j3d.*;
 import javax.print.attribute.standard.SheetCollate;
 
+import com.sun.j3d.utils.picking.PickCanvas;
+import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
@@ -22,7 +24,7 @@ public class Case extends Applet {
 	public static void main(String[] args) {
 		new MainFrame(new Case(), 800, 800);
 	}
-
+	PickCanvas pc;
 	public void init() {
 		// create canvas
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
@@ -31,6 +33,8 @@ public class Case extends Applet {
 		add(cv, BorderLayout.CENTER);
 		BranchGroup bg = createSceneGraph();
 		bg.compile();
+		pc = new PickCanvas(cv, bg);
+	    pc.setMode(PickTool.GEOMETRY);
 		SimpleUniverse su = new SimpleUniverse(cv);
 		su.getViewingPlatform().setNominalViewingTransform();
 		
@@ -60,7 +64,7 @@ public class Case extends Applet {
 		tr.setTranslation(new Vector3f(0.1f, 0.1f, 0.1f));
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-
+		
 		
 		//Spin
 		root.addChild(testTransform);
@@ -161,8 +165,11 @@ public class Case extends Applet {
 		// Oppretter shape
 		shapes[i] = new Box((float) (0.05f * Math.random()),
 				(float) (0.05f * Math.random()),
-				(float) (0.05f * Math.random()), appearance[i]);
-
+				(float) (0.05f * Math.random()),Primitive.ENABLE_GEOMETRY_PICKING |
+			      Primitive.ENABLE_APPEARANCE_MODIFY |
+			      Primitive.GENERATE_NORMALS, appearance[i]);
+				  //PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
+				
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
 
