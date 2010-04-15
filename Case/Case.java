@@ -51,6 +51,7 @@ public class Case extends Applet {
 	Appearance[]      appearance;
 	Material          material;
 	BoundingSphere    bounds;
+	
 
 	private BranchGroup createSceneGraph() {
 		int n = 11;
@@ -167,7 +168,7 @@ public class Case extends Applet {
 				(float) (0.05f * Math.random()),
 				(float) (0.05f * Math.random()),Primitive.ENABLE_GEOMETRY_PICKING |
 			      Primitive.ENABLE_APPEARANCE_MODIFY |
-			      Primitive.GENERATE_NORMALS, appearance[i]);
+			      Primitive.GENERATE_NORMALS | Primitive.GENERATE_TEXTURE_COORDS,appearance[i]);
 				  //PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 				
 		// Oppretter shapeMove
