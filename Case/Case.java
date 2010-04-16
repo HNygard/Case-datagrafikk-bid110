@@ -411,8 +411,13 @@ public class Case extends Applet {
 	
 	public Appearance createAppearance(int shapeType) {
 		Appearance appear = new Appearance();
-		URL filename = getClass().getClassLoader().getResource(
-				"images/earth.jpg");
+		URL filename;
+		if(Math.random() > 0.5)
+			filename = getClass().getClassLoader().getResource(
+			"images/earth.jpg");
+		else
+			filename = getClass().getClassLoader().getResource(
+				"images/stone.jpg");
 		TextureLoader loader = new TextureLoader(filename, this);
 		ImageComponent2D image = loader.getImage();
 		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
