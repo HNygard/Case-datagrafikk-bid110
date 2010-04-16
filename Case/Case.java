@@ -179,7 +179,8 @@ public class Case extends Applet {
 	
 	public Shape3D makeShape ()
 	{
-		Appearance ap = createAppearance();
+		int shapeType = (int)(Math.random()*2);
+		Appearance ap = createAppearance(shapeType);
 		/*
 		return new Box(
 				(float) (0.05f * Math.random()),
@@ -193,8 +194,7 @@ public class Case extends Applet {
 					*/
 		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		
-		Shape3D shape = new Shape3D(getRandomGeometry(), ap);
-		
+		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
@@ -248,7 +248,7 @@ public class Case extends Applet {
 		return rotPosScalePath;
 	}
 	
-	public GeometryArray getRandomGeometry()
+	public GeometryArray getGeometry(int shapeType)
 	{
 		double l = Math.random() * 0.4;
 		double w = Math.random() * 0.4;
@@ -271,7 +271,7 @@ public class Case extends Applet {
 		return gi.getGeometryArray();
 	}
 	
-	public Appearance createAppearance() {
+	public Appearance createAppearance(int shapeType) {
 		Appearance appear = new Appearance();
 		URL filename = getClass().getClassLoader().getResource(
 				"images/earth.jpg");
@@ -322,8 +322,9 @@ public class Case extends Applet {
 		@Override
 		public void processStimulus(Enumeration arg0)
 		{
-			shape.setGeometry(getRandomGeometry());
-			shape.setAppearance(createAppearance());
+			int shapeType = (int)(Math.random()*2);
+			shape.setGeometry(getGeometry(shapeType));
+			shape.setAppearance(createAppearance(shapeType));
 			
 			// TODO: remove old child
 			//shapeMove.addChild(makeRotPosTingen(shapeMove));
