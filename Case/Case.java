@@ -179,7 +179,8 @@ public class Case extends Applet {
 	
 	public Shape3D makeShape ()
 	{
-		Appearance ap = createAppearance();
+		int shapeType = (int)(Math.random()*2);
+		Appearance ap = createAppearance(shapeType);
 		/*
 		return new Box(
 				(float) (0.05f * Math.random()),
@@ -193,8 +194,7 @@ public class Case extends Applet {
 					*/
 		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		
-		Shape3D shape = new Shape3D(getRandomGeometry(), ap);
-		
+		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
@@ -248,22 +248,160 @@ public class Case extends Applet {
 		return rotPosScalePath;
 	}
 	
-	public GeometryArray getRandomGeometry()
+	public GeometryArray getGeometry(int shapeType)
 	{
+	
+	GeometryInfo gi = null;
+	Point3d[] pts = null;
+	int[] indices = null;
+	
+	if(shapeType ==1){
+		
 		double l = Math.random() * 0.4;
 		double w = Math.random() * 0.4;
 		//w = 0.04;
 		double h = Math.random() * 0.4;
 		//h=0.01;
-		GeometryInfo gi = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
-		Point3d[] pts = new Point3d[4];
-		pts[0] = new Point3d(0, 0, h);
-		pts[1] = new Point3d(-w, 0, 0);
-		pts[2] = new Point3d(w, 0, 0);
-		pts[3] = new Point3d(0, l, 0);
-		
+		gi = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+		pts = new Point3d[8];
+		pts[0] = new Point3d(0.5f,0.5f,0.5f);
+		pts[1] = new Point3d(0.5f,-0.5f,0.5f);
+		pts[2] = new Point3d(-0.5f,-0.5f,0.5f);
+		pts[3] = new Point3d(-0.5f,0.5f,0.5f);
+		pts[4] = new Point3d(0.5f,0.5f,-0.5f);
+		pts[5] = new Point3d(0.5f,-0.5f,-0.5f);
+		pts[6] = new Point3d(-0.5f,-0.5f,-0.5f);
+		pts[7] = new Point3d(-0.5f,0.5f,-0.5f);
+
 		gi.setCoordinates(pts);
-		int[] indices = {0, 1, 2, 0, 3, 1, 0, 2, 3, 2, 1, 3};
+		indices = new int[24];
+		indices[0] = 0;
+		indices[1] = 3;
+		indices[2] = 2;
+		indices[3] = 1;
+		indices[4] = 0;
+		indices[5] = 1;
+		indices[6] = 5;
+		indices[7] = 4;
+		indices[8] = 4;
+		indices[9] = 5;
+		indices[10] = 6;
+		indices[11] = 7;
+		indices[12] = 2;
+		indices[13] = 3;
+		indices[14] = 7;
+		indices[15] = 6;
+		indices[16] = 0;
+		indices[17] = 4;
+		indices[18] = 7;
+		indices[19] = 3;
+		indices[20] = 1;
+		indices[21] = 2;
+		indices[22] = 6;
+		indices[23] = 5;
+	}
+	
+	if (shapeType == 2){
+		gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
+	    double phi = 0.5*(Math.sqrt(5)+1);
+	    pts = new Point3d[20];
+	    pts[0] = new Point3d(1,1,1);
+	    pts[1] = new Point3d(0,1/phi,phi);
+	    pts[2] = new Point3d(phi,0,1/phi);
+	    pts[3] = new Point3d(1/phi,phi,0);
+	    pts[4] = new Point3d(-1,1,1);
+	    pts[5] = new Point3d(0,-1/phi,phi);
+	    pts[6] =new Point3d(1,-1,1);
+	    pts[7] =new Point3d(phi,0,-1/phi);
+	    pts[8] =new Point3d(1,1,-1);
+	    pts[9] =new Point3d(-1/phi,phi,0);
+	    pts[10] =new Point3d(-phi,0,1/phi);
+	    pts[11] =new Point3d(-1,-1,1);
+	    pts[12] =new Point3d(1/phi,-phi,0);
+	    pts[13] =new Point3d(1,-1,-1);
+	    pts[14] =new Point3d(0,1/phi,-phi);
+	    pts[15] =new Point3d(-1,1,-1);
+	    pts[16] =new Point3d(-1/phi,-phi,0);
+	    pts[17] =new Point3d(-phi,0,-1/phi);
+	    pts[18] =new Point3d(0,-1/phi,-phi);
+	    pts[19] =new Point3d(-1,-1,-1);
+		
+	    int i = 0;
+	    indices[i] = 0; i++;
+	    indices[i] = 1; i++;
+		indices[i] = 5; i++;
+		indices[i] = 6; i++;
+		indices[i] = 2; i++;
+		
+		indices[i] = 0; i++;
+		indices[i] = 2; i++;
+		indices[i] = 7; i++;
+		indices[i] = 8; i++;
+		indices[i] = 3; i++;
+		//10
+		indices[i] = 0; i++;
+		indices[i] = 3; i++;
+		indices[i] = 9; i++;
+		indices[i] = 4; i++;
+		indices[i] = 1; i++;
+		
+		indices[i] = 1; i++;
+		indices[i] = 4; i++;
+		indices[i] = 10; i++;
+		indices[i] = 11; i++;
+		indices[i] = 5; i++;
+		//20
+		indices[i] = 2; i++;
+		indices[i] = 6; i++;
+		indices[i] = 12; i++;
+		indices[i] = 13; i++;
+		indices[i] = 7; i++;
+		
+		indices[i] = 3; i++;
+		indices[i] = 8; i++;
+		indices[i] = 14; i++;
+		indices[i] = 15; i++;
+		indices[i] = 9; i++;
+		//30
+		indices[i] = 5; i++;
+		indices[i] = 11; i++;
+		indices[i] = 16; i++;
+		indices[i] = 12; i++;
+		indices[i] = 6; i++;
+		
+		indices[i] = 7; i++;
+		indices[i] = 13; i++;
+		indices[i] = 18; i++;
+		indices[i] = 14; i++;
+		indices[i] = 8; i++;
+		//40
+		indices[i] = 9; i++;
+		indices[i] = 15; i++;
+		indices[i] = 17; i++;
+		indices[i] = 10; i++;
+		indices[i] = 4; i++;
+		
+		indices[i] = 19; i++;
+		indices[i] = 16; i++;
+		indices[i] = 11; i++;
+		indices[i] = 10; i++;
+		indices[i] = 17; i++;
+		//50
+		indices[i] = 19; i++;
+		indices[i] = 17; i++;
+		indices[i] = 15; i++;
+		indices[i] = 14; i++;
+		indices[i] = 18; i++;
+		
+		indices[i] = 19; i++;
+		indices[i] = 18; i++;
+		indices[i] = 13; i++;
+		indices[i] = 12; i++;
+		indices[i] = 16; i++;
+		//60
+		int[] stripCounts = {5,5,5,5,5,5,5,5,5,5,5,5};
+	    gi.setStripCounts(stripCounts);
+	}
 		gi.setCoordinates(pts);
 		gi.setCoordinateIndices(indices);
 		NormalGenerator ng = new NormalGenerator();
@@ -271,7 +409,7 @@ public class Case extends Applet {
 		return gi.getGeometryArray();
 	}
 	
-	public Appearance createAppearance() {
+	public Appearance createAppearance(int shapeType) {
 		Appearance appear = new Appearance();
 		URL filename;
 		if(Math.random() > 0.5)
@@ -327,8 +465,9 @@ public class Case extends Applet {
 		@Override
 		public void processStimulus(Enumeration arg0)
 		{
-			shape.setGeometry(getRandomGeometry());
-			shape.setAppearance(createAppearance());
+			int shapeType = (int)(Math.random()*2);
+			shape.setGeometry(getGeometry(shapeType));
+			shape.setAppearance(createAppearance(shapeType));
 			
 			// TODO: remove old child
 			//shapeMove.addChild(makeRotPosTingen(shapeMove));
