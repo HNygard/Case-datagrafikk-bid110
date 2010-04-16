@@ -47,14 +47,15 @@ public class Case extends Applet {
 	}
 	
 	TransformGroup[]  shapeMove;
-	Primitive[]       shapes;
+	Shape3D[]       shapes;
 	Appearance[]      appearance;
 	Material          material;
 	BoundingSphere    bounds;
+	CaseBehavior[]    behave;
 	
 
 	private BranchGroup createSceneGraph() {
-		int n = 11;
+		int n = 5;
 		
 		/* root */
 		BranchGroup root = new BranchGroup();
@@ -97,14 +98,16 @@ public class Case extends Applet {
 		/* Making shapes from 0 to n */
 		
 		// Make arrays
-		shapeMove = new TransformGroup[n];
-		shapes = new Primitive[n];
-		appearance = new Appearance[n];
+		shapeMove   = new TransformGroup[n];
+		shapes      = new Shape3D[n];
+		appearance  = new Appearance[n];
+		behave      = new CaseBehavior[n];
 		
 		// Make shapes
 		for (int i = 0; i < n; i++) {
-			makeShape(i);
+			makeShapes(i);
 			testTransform.addChild(shapeMove[i]);
+			root.addChild(behave[i]);
 		}
 		
 		/*
@@ -155,40 +158,59 @@ public class Case extends Applet {
 		return root;
 	}
 	
-	public void makeShape (int i)
+	public void makeShapes (int i)
 	{
-		//System.out.println("Oppretter shape " + i);
-		appearance[i] = createAppearance();
-		appearance[i].setMaterial(material);
-		appearance[i].setTransparencyAttributes(new TransparencyAttributes(
-				TransparencyAttributes.BLENDED, 0.0f));
-		
 		// Oppretter shape
-		shapes[i] = new Box((float) (0.05f * Math.random()),
-				(float) (0.05f * Math.random()),
-				(float) (0.05f * Math.random()),Primitive.ENABLE_GEOMETRY_PICKING |
-			      Primitive.ENABLE_APPEARANCE_MODIFY |
-			      Primitive.GENERATE_NORMALS | Primitive.GENERATE_TEXTURE_COORDS,appearance[i]);
-				  //PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
+		shapes[i] = makeShape();
 				
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
-
-
-		
-		
-		
 		shapeMove[i].addChild(shapes[i]);
 		
 		// Oppretter RotPosScaleIntepolator
+		shapeMove[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		shapeMove[i].addChild(makeRotPosTingen(shapeMove[i]));
+		
+		// Oppretter Behavior
+		behave[i] = new CaseBehavior(shapes[i], shapeMove[i]);
+		behave[i].setSchedulingBounds(bounds);
+		
+	}
+	
+	public Shape3D makeShape ()
+	{
+		Appearance ap = createAppearance();
+		/*
+		return new Box(
+				(float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()),
+					Primitive.ENABLE_GEOMETRY_PICKING |
+					Primitive.ENABLE_APPEARANCE_MODIFY |
+					Primitive.GENERATE_NORMALS |
+					Primitive.GENERATE_TEXTURE_COORDS,ap);
+					   Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
+					*/
+		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
+		
+		Shape3D shape = new Shape3D(getRandomGeometry(), ap);
+		
+		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+		shape.setAppearance(ap);
+		return shape;
+	}
+	
+	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove)
+	{
+
 		Alpha alpha = new Alpha(-1, 8000);
 		Transform3D axisOfRotPos = new Transform3D();
 		float[] knots = { 0.0f, 0.3f, 0.5f, 0.7f, 1.0f };
 		Quat4f[] quats = new Quat4f[5];
 		Point3f[] positions = new Point3f[5];
 		float[] scales = {0.4f, 0.4f, 2.0f, 0.4f, 0.4f};
-		
-		shapeMove[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
 		AxisAngle4f axis = new AxisAngle4f(1.0f, 0.0f, 0.0f, 0.0f);
 		axisOfRotPos.set(axis);
@@ -219,13 +241,34 @@ public class Case extends Applet {
 				(float) (avstand_ytre * Math.cos(theta)),
 				(float) (avstand_ytre * Math.sin(theta)),
 				0.0f);
-		
-		
-		// Create a RotPosPathInterpolator object RotPosScalePathInterpolator
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
-				shapeMove[i], axisOfRotPos, knots, quats, positions, scales);
+				shapeMove, axisOfRotPos, knots, quats, positions, scales);
 		rotPosScalePath.setSchedulingBounds(bounds);
-		shapeMove[i].addChild(rotPosScalePath);
+		
+		return rotPosScalePath;
+	}
+	
+	public GeometryArray getRandomGeometry()
+	{
+		double l = Math.random() * 0.4;
+		double w = Math.random() * 0.4;
+		//w = 0.04;
+		double h = Math.random() * 0.4;
+		//h=0.01;
+		GeometryInfo gi = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
+		Point3d[] pts = new Point3d[4];
+		pts[0] = new Point3d(0, 0, h);
+		pts[1] = new Point3d(-w, 0, 0);
+		pts[2] = new Point3d(w, 0, 0);
+		pts[3] = new Point3d(0, l, 0);
+		
+		gi.setCoordinates(pts);
+		int[] indices = {0, 1, 2, 0, 3, 1, 0, 2, 3, 2, 1, 3};
+		gi.setCoordinates(pts);
+		gi.setCoordinateIndices(indices);
+		NormalGenerator ng = new NormalGenerator();
+		ng.generateNormals(gi);
+		return gi.getGeometryArray();
 	}
 	
 	public Appearance createAppearance() {
@@ -237,19 +280,36 @@ public class Case extends Applet {
 		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
 				image.getWidth(), image.getHeight());
 		texture.setImage(0, image);
+		
 		texture.setEnable(true);
 		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
 		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
 		appear.setTexture(texture);
+		
+		TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, TexCoordGeneration.TEXTURE_COORDINATE_3);
+		tcg.setPlaneR(new Vector4f(2,0,0,0));
+		tcg.setPlaneS(new Vector4f(0,2,0,0));
+		tcg.setPlaneT(new Vector4f(0,0,2,0));
+		tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
+		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
+		
+
+		appear.setMaterial(material);
+		appear.setTexCoordGeneration(tcg);
+		appear.setTransparencyAttributes(new TransparencyAttributes(
+				TransparencyAttributes.BLENDED, 0.0f));
 		return appear;
 	}
 	
 	public class CaseBehavior extends Behavior 
 	{
-		Primitive shape;
-		public CaseBehavior (Primitive shape)
+		Shape3D shape;
+		TransformGroup shapeMove;
+		
+		public CaseBehavior (Shape3D shape, TransformGroup shapeMove)
 		{
 			this.shape = shape;
+			this.shapeMove = shapeMove;
 		}
 
 		@Override
@@ -262,7 +322,11 @@ public class Case extends Applet {
 		@Override
 		public void processStimulus(Enumeration arg0)
 		{
-			shape = makeShape2();
+			shape.setGeometry(getRandomGeometry());
+			shape.setAppearance(createAppearance());
+			
+			// TODO: remove old child
+			//shapeMove.addChild(makeRotPosTingen(shapeMove));
 			
 			// Time for testing purpose
 			wakeupOn(new WakeupOnElapsedTime(1000));
