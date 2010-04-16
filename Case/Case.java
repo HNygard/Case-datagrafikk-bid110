@@ -255,15 +255,19 @@ public class Case extends Applet {
 		//w = 0.04;
 		double h = Math.random() * 0.4;
 		//h=0.01;
-		GeometryInfo gi = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
-		Point3d[] pts = new Point3d[4];
-		pts[0] = new Point3d(0, 0, h);
-		pts[1] = new Point3d(-w, 0, 0);
-		pts[2] = new Point3d(w, 0, 0);
-		pts[3] = new Point3d(0, l, 0);
-		
+		GeometryInfo gi = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+		Point3d[] pts = new Point3d[8];
+		pts[0] = new Point3d(0.5f,0.5f,0.5f);
+		pts[1] = new Point3d(0.5f,-0.5f,0.5f);
+		pts[2] = new Point3d(-0.5f,-0.5f,0.5f);
+		pts[3] = new Point3d(-0.5f,0.5f,0.5f);
+		pts[4] = new Point3d(0.5f,0.5f,-0.5f);
+		pts[5] = new Point3d(0.5f,-0.5f,-0.5f);
+		pts[6] = new Point3d(-0.5f,-0.5f,-0.5f);
+		pts[7] = new Point3d(-0.5f,0.5f,-0.5f);
+
 		gi.setCoordinates(pts);
-		int[] indices = {0, 1, 2, 0, 3, 1, 0, 2, 3, 2, 1, 3};
+		int[] indices = {0,3,2,1, 0,1,5,4, 4,5,6,7, 2,3,7,6, 0,4,7,3, 1,2,6,5};
 		gi.setCoordinates(pts);
 		gi.setCoordinateIndices(indices);
 		NormalGenerator ng = new NormalGenerator();
