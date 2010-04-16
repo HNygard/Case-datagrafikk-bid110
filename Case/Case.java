@@ -189,6 +189,7 @@ public class Case extends Applet {
 					Primitive.ENABLE_APPEARANCE_MODIFY |
 					Primitive.GENERATE_NORMALS |
 					Primitive.GENERATE_TEXTURE_COORDS,ap);
+					   Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
 					*/
 		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		
@@ -197,6 +198,7 @@ public class Case extends Applet {
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+		shape.setAppearance(ap);
 		return shape;
 	}
 	
@@ -262,6 +264,7 @@ public class Case extends Applet {
 		
 		gi.setCoordinates(pts);
 		int[] indices = {0, 1, 2, 0, 3, 1, 0, 2, 3, 2, 1, 3};
+		gi.setCoordinates(pts);
 		gi.setCoordinateIndices(indices);
 		NormalGenerator ng = new NormalGenerator();
 		ng.generateNormals(gi);
@@ -277,13 +280,22 @@ public class Case extends Applet {
 		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
 				image.getWidth(), image.getHeight());
 		texture.setImage(0, image);
+		
 		texture.setEnable(true);
 		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
 		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
 		appear.setTexture(texture);
 		
+		TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, TexCoordGeneration.TEXTURE_COORDINATE_3);
+		tcg.setPlaneR(new Vector4f(2,0,0,0));
+		tcg.setPlaneS(new Vector4f(0,2,0,0));
+		tcg.setPlaneT(new Vector4f(0,0,2,0));
+		tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
+		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
+		
 
 		appear.setMaterial(material);
+		appear.setTexCoordGeneration(tcg);
 		appear.setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
 		return appear;
