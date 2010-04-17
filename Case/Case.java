@@ -83,7 +83,7 @@ public class Case extends Applet {
 		AmbientLight light = new AmbientLight(true, new Color3f(Color.white));
 		light.setInfluencingBounds(bounds);
 		root.addChild(light);
-		PointLight ptlight = new PointLight(new Color3f(Color.BLUE),
+		PointLight ptlight = new PointLight(new Color3f(Color.WHITE),
 				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
 		ptlight.setInfluencingBounds(bounds);
 		root.addChild(ptlight);
@@ -94,6 +94,8 @@ public class Case extends Applet {
 		// temp
 	    material.setAmbientColor(new Color3f(0f,0f,0f));
 	    material.setDiffuseColor(new Color3f(0.15f,0.15f,0.25f));
+	   
+	    
 		
 		/* Making shapes from 0 to n */
 		
@@ -439,33 +441,34 @@ public class Case extends Applet {
 		TextureLoader loader = new TextureLoader(filename, this);
 		ImageComponent2D image = loader.getImage();
 		
+		 TextureCubeMap texture = new TextureCubeMap(Texture.BASE_LEVEL, Texture.RGBA,
+				 image.getWidth());
+		 texture.setEnable(true);
+		 texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
+		 texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
+	     appear.setTexture(texture);
+		    
+	     TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
+		 TexCoordGeneration.TEXTURE_COORDINATE_3);
+		 tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
+		 tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
+		 tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
+		 appear.setTexCoordGeneration(tcg);
+		 appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
+		 
+		
+		// definerer bilde for hver av sidene for Dodecahedron
 		if(shapeType == 1){
-			 TextureCubeMap texture = new TextureCubeMap(Texture.BASE_LEVEL, Texture.RGBA,
-					 image.getWidth());
-					    texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
+			 		    texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
 					    texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
 					    texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
 					    texture.setImage(0, TextureCubeMap.POSITIVE_X, image);
 					    texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
 					    texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);
 					   
-					    texture.setEnable(true);
-					    texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-					    texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
-					    appear.setTexture(texture);
-					    
-					    TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
-					    TexCoordGeneration.TEXTURE_COORDINATE_3);
-					    tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
-					    tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
-					    tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
-					    appear.setTexCoordGeneration(tcg);
-					    appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
-					    return appear;
-		}
+		}			  
+		// definerer bilde for hver av sidene for firkant
 		if(shapeType == 0){
-			TextureCubeMap texture = new TextureCubeMap(Texture.BASE_LEVEL, Texture.RGBA,
-					 image.getWidth());
 					    texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
 					    texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
 					    texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
@@ -473,45 +476,21 @@ public class Case extends Applet {
 					    texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
 					    texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);
 					   
-					    texture.setEnable(true);
-					    texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-					    texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
-					    appear.setTexture(texture);
 					    
-					    TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
-					    TexCoordGeneration.TEXTURE_COORDINATE_3);
-					    tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
-					    tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
-					    tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
-					    appear.setTexCoordGeneration(tcg);
-					    appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
-					    return appear;
 		}
+		// strekker bilde 
 		else{
-		
-		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
-				image.getWidth(), image.getHeight());
-		texture.setImage(0, image);
-		
-		texture.setEnable(true);
-		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
-		appear.setTexture(texture);
-		
-		TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, TexCoordGeneration.TEXTURE_COORDINATE_3);
-		tcg.setPlaneR(new Vector4f(2,0,0,0));
-		tcg.setPlaneS(new Vector4f(0,2,0,0));
-		tcg.setPlaneT(new Vector4f(0,0,2,0));
+		Texture2D texture1 = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
+		image.getWidth(), image.getHeight());
+		texture1.setImage(0, image);
 		tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
-		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
-		
-
 		appear.setMaterial(material);
 		appear.setTexCoordGeneration(tcg);
 		appear.setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
-		return appear;
+		
 		}
+		return appear;
 	}
 	
 	public class CaseBehavior extends Behavior 
