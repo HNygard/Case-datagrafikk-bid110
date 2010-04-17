@@ -14,6 +14,7 @@ import javax.print.attribute.standard.SheetCollate;
 
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickTool;
+import com.sun.j3d.utils.picking.behaviors.PickRotateBehavior;
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
@@ -64,7 +65,7 @@ public class Case extends JFrame {
 		Canvas3D cv = new Canvas3D(gc);
 		setLayout(new BorderLayout());
 		add(cv, BorderLayout.CENTER);
-		BranchGroup bg = createSceneGraph();
+		BranchGroup bg = createSceneGraph(cv);
 		bg.compile();
 		pc = new PickCanvas(cv, bg);
 	    pc.setMode(PickTool.GEOMETRY);
@@ -108,7 +109,7 @@ public class Case extends JFrame {
 	protected ArrayList<Integer>  images_used;
 	
 
-	private BranchGroup createSceneGraph() {
+	private BranchGroup createSceneGraph(Canvas3D cv) {
 		int n = 5;
 		
 		/* root */
@@ -120,6 +121,10 @@ public class Case extends JFrame {
 		tr.setTranslation(new Vector3f(0.1f, 0.1f, 0.1f));
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		
+		PickRotateBehavior rotatorObjekt = new PickRotateBehavior(root, cv, bounds, 
+			      PickTool.GEOMETRY);
+		root.addChild(rotatorObjekt);
 		
 		
 		//Spin
@@ -251,9 +256,12 @@ public class Case extends JFrame {
 		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		
 		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
+		 PickTool.setCapabilities(shape, PickTool.INTERSECT_FULL);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+		shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
+		
 		shape.setAppearance(ap);
 		return shape;
 	}
