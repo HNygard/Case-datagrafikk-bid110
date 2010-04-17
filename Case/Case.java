@@ -1,9 +1,14 @@
 package Case;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.vecmath.*;
 
 import java.awt.*;
 import java.awt.event.*;
+
+import javax.imageio.ImageIO;
 import javax.media.j3d.*;
 import javax.print.attribute.standard.SheetCollate;
 
@@ -14,18 +19,46 @@ import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
 
 import java.applet.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import com.sun.j3d.utils.applet.MainFrame;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 
-public class Case extends Applet {
-	public static void main(String[] args) {
-		new MainFrame(new Case(), 800, 800);
+public class Case extends JFrame {
+	public static void main(String[] s) {
+		
+		
+		// Getting save directory
+		String saveDir;
+		if(s.length > 0)
+		{
+			saveDir = s[0];
+		}
+		else
+		{
+			saveDir =
+				JOptionPane.showInputDialog(null, "Please enter directory where " +
+						"the images is/will be saved\n\n" +
+						"Also possible to specifiy as argument 1 when " +
+						"running this program.",
+						 "c:\\jobbminnepinne\\webcamtest"); 
+		}
+		
+		new Case(saveDir);
 	}
-	PickCanvas pc;
-	public void init() {
+	
+	public Case(String saveDir) {
+		
+		// Settings
+		this.saveDirectory = saveDir;
+		
+		// images
+		getImages();
+		
 		// create canvas
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
 		Canvas3D cv = new Canvas3D(gc);
@@ -44,14 +77,35 @@ public class Case extends Applet {
 	    su.getViewingPlatform().setViewPlatformBehavior(orbit);
 		
 	    su.addBranchGraph(bg);
+	    
+	    // JFrame stuff
+		setTitle("Caseoppgave - Datagrafikk ved UiS - Hallvard, Gunnstein og Stefan");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		//setUndecorated(true);
+		pack();
+		setSize(800, 800);
+		
+		setVisible(true);
 	}
 	
+	// Settings
+	String            saveDirectory;
+	
+	// Other stuff
+	PickCanvas        pc;
+	
 	TransformGroup[]  shapeMove;
-	Shape3D[]       shapes;
+	Shape3D[]         shapes;
 	Appearance[]      appearance;
 	Material          material;
 	BoundingSphere    bounds;
 	CaseBehavior[]    behave;
+	
+	
+	// Images
+	protected ArrayList<String>   images;
+	protected ArrayList<Integer>  images_used;
 	
 
 	private BranchGroup createSceneGraph() {
@@ -494,5 +548,45 @@ public class Case extends Applet {
 			wakeupOn(new WakeupOnElapsedTime(1000));
 		}
 		
+	}
+	
+	protected void getImages() {
+		File directory = new File(this.saveDirectory);
+
+		//BufferedImage img = null;
+		
+		images = new ArrayList<String>();
+		if( directory.exists() && directory.isDirectory())
+		{
+			//File[] files = directory.listFiles();
+			String[] files = directory.list();
+		
+			for(int i=0; i < files.length; i++)
+			{
+				if(files[i].startsWith("cam"))
+				{
+					// Windows spesific
+					images.add(this.saveDirectory + "\\" + files[i]);
+				}
+			}
+		}
+		
+		System.out.println("Total image count = " + images.size());
+	}
+	
+	public Image getImage(int imagenum)
+	{
+		if(imagenum == -1)
+		{
+			return null;
+		}
+		
+		String path = images.get(imagenum);
+		try {
+			return ImageIO.read(new File(path));
+		} catch (IOException e) {
+			System.out.println("Path til ikke funnet: " + path);
+			return null;
+		}
 	}
 }
