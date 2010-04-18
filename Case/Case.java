@@ -975,7 +975,7 @@ public class Case extends JFrame implements KeyListener {
 		if(img == null)
 			return getNoCamImage();
 		else
-			return img;
+			return img.getScaledInstance(256, 256, Image.SCALE_FAST);
 	}
 	
 
