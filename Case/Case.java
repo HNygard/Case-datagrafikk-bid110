@@ -64,7 +64,6 @@ public class Case extends JFrame implements KeyListener {
 	{
 		// JFrame
 		setLayout(new BorderLayout());
-		addKeyListener(this);
 		
 		// Settings
 		this.saveDirectory = saveDir;
@@ -160,6 +159,7 @@ public class Case extends JFrame implements KeyListener {
 		// Create canvas
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
 		Canvas3D cv = new Canvas3D(gc);
+		cv.addKeyListener(this);
 		add(cv, BorderLayout.CENTER);
 		BranchGroup bg = createSceneGraph();
 		bg.compile();
@@ -926,7 +926,10 @@ public class Case extends JFrame implements KeyListener {
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == 67) // C 
 		{
-			this.captureImage();
+			if(cameraFound)
+				this.captureImage();
+			else
+				JOptionPane.showMessageDialog(null, "Ingen kamera koblet til. Kan ikke hente bilde.");
 		}
 		
 		else if(e.getKeyCode() == 27) // Escape
