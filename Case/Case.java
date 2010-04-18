@@ -52,13 +52,16 @@ public class Case extends JFrame {
 						"the images is/will be saved\n\n" +
 						"Also possible to specifiy as argument 1 when " +
 						"running this program.",
-						 "c:\\jobbminnepinne\\webcamtest"); 
+						 ""); 
 		}
 		
 		new Case(saveDir);
 	}
 	
 	public Case(String saveDir) {
+
+		setLayout(new BorderLayout());
+		
 		
 		// Settings
 		this.saveDirectory = saveDir;
@@ -92,7 +95,7 @@ public class Case extends JFrame {
 		//String str2 = "vfw:Microsoft WDM Image Capture (Win32):0";
 		if(names.size() == 0) {
 			JOptionPane.showMessageDialog(null, "Ingen kamera funnet. " +
-					"Du må koble til et kamera for å kjøre programmet.",
+					"Du bør koble til et kamera for å kjøre programmet optimalt.",
 					"Feil",
 					 JOptionPane.ERROR_MESSAGE); 
 			cameraFound = false;
@@ -154,7 +157,6 @@ public class Case extends JFrame {
 		// Create canvas
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
 		Canvas3D cv = new Canvas3D(gc);
-		setLayout(new BorderLayout());
 		add(cv, BorderLayout.CENTER);
 		BranchGroup bg = createSceneGraph();
 		bg.compile();
