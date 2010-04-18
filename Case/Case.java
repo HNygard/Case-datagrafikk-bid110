@@ -9,7 +9,12 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 import javax.media.Buffer;
+import javax.media.CaptureDeviceInfo;
+import javax.media.CaptureDeviceManager;
+import javax.media.Manager;
+import javax.media.MediaLocator;
 import javax.media.Player;
+import javax.media.control.FormatControl;
 import javax.media.control.FrameGrabbingControl;
 import javax.media.format.VideoFormat;
 import javax.media.j3d.*;
@@ -28,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.Vector;
 
 public class Case extends JFrame {
 	public static void main(String[] s) {
@@ -56,11 +62,96 @@ public class Case extends JFrame {
 		
 		// Settings
 		this.saveDirectory = saveDir;
+		System.out.println("Using " + this.saveDirectory + " as directory.");
 		
-		// images
+		// Images
 		getImages();
 		
-		// create canvas
+		// Webcam
+		images_used = new ArrayList<Integer>();
+		images_lastadded = new ArrayList<Integer>();
+		images_nevershown = new ArrayList<Integer>();
+		
+		
+		Vector devices = (Vector) CaptureDeviceManager.getDeviceList(null).clone();
+		Enumeration enumeration = devices.elements();
+		System.out.println("- Available cameras -");
+		ArrayList<String> names = new ArrayList<String>();
+		while (enumeration.hasMoreElements())
+		{
+			CaptureDeviceInfo cdi = (CaptureDeviceInfo) enumeration.nextElement();
+			String name = cdi.getName();
+			if (name.startsWith("vfw:"))
+			{
+				names.add(name);
+				System.out.println(name);
+			}
+		}
+		
+		//String str1 = "vfw:Logitech USB Video Camera:0";
+		//String str2 = "vfw:Microsoft WDM Image Capture (Win32):0";
+		if(names.size() == 0) {
+			JOptionPane.showMessageDialog(null, "Ingen kamera funnet. " +
+					"Du må koble til et kamera for å kjøre programmet.",
+					"Feil",
+					 JOptionPane.ERROR_MESSAGE); 
+			cameraFound = false;
+		}
+		else
+		{
+			cameraFound = true;
+			if (names.size() > 1)
+			{
+	
+				JOptionPane.showMessageDialog(null, 
+						"Fant mer enn 1 kamera. " +
+						"Velger da:\n" +
+						names.get(0),
+						"Advarsel",
+						 JOptionPane.WARNING_MESSAGE);
+			}
+		}
+		
+		if(cameraFound)
+		{
+			String str2 = names.get(0);
+			di = CaptureDeviceManager.getDevice(str2);
+			ml = di.getLocator();
+			
+			try {
+				player = Manager.createRealizedPlayer(ml);
+				formatControl = (FormatControl)player.getControl(
+	            "javax.media.control.FormatControl");
+				
+				/*
+				Format[] formats = formatControl.getSupportedFormats();
+				for (int i=0; i<formats.length; i++)
+					System.out.println(formats[i].toString());
+				*/
+				
+				player.start();
+			}
+			catch(javax.media.NoPlayerException e) 
+			{
+				 JOptionPane.showMessageDialog(null, "Klarer ikke å starte"+
+						 " kamera. Sjekk at det er koblet til.", 
+						 "IOException", 
+						 JOptionPane.ERROR_MESSAGE); 
+				 System.exit(0);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				System.exit(0);
+			}
+			
+			if ((comp = player.getVisualComponent()) != null) {
+				add(comp, BorderLayout.EAST);
+			}
+		}
+		
+		
+		// Create canvas
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
 		Canvas3D cv = new Canvas3D(gc);
 		setLayout(new BorderLayout());
@@ -120,6 +211,13 @@ public class Case extends JFrame {
 	public Buffer buf;
 	public Image img;
 	public BufferToImage btoi;
+	public CaptureDeviceInfo di;
+	public MediaLocator ml;
+	public FormatControl formatControl;
+	protected Component comp;
+	
+	public boolean cameraFound;
+	
 
 	private BranchGroup createSceneGraph() {
 		int n = 5;
