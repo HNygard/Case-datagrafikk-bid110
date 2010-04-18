@@ -283,7 +283,7 @@ public class Case extends JFrame implements KeyListener {
 		}
 		if (cameraFound){
 			Shape3D webcamBox = new Shape3D();
-			webcamBox = makeShape();
+			webcamBox = makeCamShape();
 			camBehave = new CamBehavior(webcamBox);
 			camBehave.setSchedulingBounds(bounds);
 			testTransform.addChild(webcamBox);
@@ -381,6 +381,30 @@ public class Case extends JFrame implements KeyListener {
 		return shape;
 	}
 	
+	public Shape3D makeCamShape ()
+	{
+		int shapeType = 0;
+		Appearance ap = createCamAppearance();
+		/*
+		return new Box(
+				(float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()),
+					Primitive.ENABLE_GEOMETRY_PICKING |
+					Primitive.ENABLE_APPEARANCE_MODIFY |
+					Primitive.GENERATE_NORMALS |
+					Primitive.GENERATE_TEXTURE_COORDS,ap);
+					   Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
+					*/
+		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
+		
+		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
+		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+		shape.setAppearance(ap);
+		return shape;
+	}
 	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove)
 	{
 
