@@ -717,6 +717,74 @@ public class Case extends JFrame {
 		
 	}
 	
+	public class CamBehavior extends Behavior 
+	{
+		Shape3D shape;
+		
+		public CamBehavior (Shape3D shape)
+		{
+			this.shape = shape;
+		}
+
+		@Override
+		public void initialize()
+		{
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+
+		@Override
+		public void processStimulus(Enumeration arg0)
+		{
+			shape.setAppearance(createCamAppearance());
+			
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+		
+	}
+	
+	public Appearance createCamAppearance() {
+		Appearance appear = new Appearance();
+		/*
+		URL filename;
+		if(Math.random() > 0.5)
+			filename = getClass().getClassLoader().getResource(
+			"images/earth.jpg");
+		else
+			filename = getClass().getClassLoader().getResource(
+				"images/stone.jpg");*/
+		
+		TextureLoader loader = new TextureLoader(getCamImage(), this);
+		ImageComponent2D image = loader.getImage();
+		
+
+	    TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
+		TexCoordGeneration.TEXTURE_COORDINATE_3);
+		tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
+		tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
+		tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
+		appear.setTexCoordGeneration(tcg);
+		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
+		
+		TextureCubeMap texture = new TextureCubeMap(Texture.BASE_LEVEL, Texture.RGBA,
+				 image.getWidth());
+		texture.setEnable(true);
+		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
+		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
+	    appear.setTexture(texture);
+	    			  
+		// definerer bilde for hver av sidene for firkant
+	    texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
+	    texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
+	    texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
+	    texture.setImage(0, TextureCubeMap.POSITIVE_X, image);
+	    texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
+	    texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);  
+	    
+		return appear;
+	}
+	
 	protected void getImages() {
 		File directory = new File(this.saveDirectory);
 
@@ -828,5 +896,19 @@ public class Case extends JFrame {
 		} catch (java.io.IOException io) {
 			System.out.println("IOException");
 		}*/
+	}
+	
+	public Image getCamImage ()
+	{
+		// Grab a frame
+		FrameGrabbingControl fgc = (FrameGrabbingControl) player
+				.getControl("javax.media.control.FrameGrabbingControl");
+		buf = fgc.grabFrame();
+		
+		// Convert it to an image
+		btoi = new BufferToImage((VideoFormat) buf.getFormat());
+		img = btoi.createImage(buf);
+		
+		return img;
 	}
 }
