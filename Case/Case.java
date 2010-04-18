@@ -195,7 +195,7 @@ public class Case extends JFrame {
 	Material          material;
 	BoundingSphere    bounds;
 	CaseBehavior[]    behave;
-	CaseBehavior	  camBehave;
+	CamBehavior	  camBehave;
 	
 	// Images
 	public ArrayList<String>   images;
@@ -281,7 +281,7 @@ public class Case extends JFrame {
 		if (cameraFound){
 			Shape3D webcamBox = new Shape3D();
 			webcamBox = makeShape();
-			camBehave = new CamBehavior(shapes);
+			camBehave = new CamBehavior(webcamBox);
 			camBehave.setSchedulingBounds(bounds);
 		}
 		
