@@ -10,6 +10,8 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.media.Buffer;
 import javax.media.CaptureDeviceInfo;
 import javax.media.CaptureDeviceManager;
@@ -29,6 +31,7 @@ import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -36,11 +39,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Vector;
-
+/*
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
-
+*/
 
 public class Case extends JFrame implements KeyListener {
 	public static void main(String[] s) {
@@ -943,19 +946,27 @@ public class Case extends JFrame implements KeyListener {
 	
 	public static void saveJPG(Image img, String s) {
 		BufferedImage bi = new BufferedImage(
-				img.getWidth(null), 
-				img.getHeight(null), 
+				256, 
+				256, 
 				BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2 = bi.createGraphics();
 		g2.drawImage(img, null, null);
-
+		try {
+			ImageIO.write(bi,"jpg", new FileImageOutputStream(new File(s)));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		/*
 		FileOutputStream out = null;
 		try {
 			out = new FileOutputStream(s);
 		} catch (java.io.FileNotFoundException io) {
 			System.out.println("File Not Found");
-		}
-		
+		}*/
+		/*
 		JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
 		JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(bi);
 		param.setQuality(0.5f, false);
@@ -966,7 +977,7 @@ public class Case extends JFrame implements KeyListener {
 			out.close();
 		} catch (java.io.IOException io) {
 			System.out.println("IOException");
-		}
+		}*/
 	}
 	
 	public BufferedImage getCamImage ()
