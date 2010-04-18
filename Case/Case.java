@@ -198,7 +198,7 @@ public class Case extends JFrame implements KeyListener {
 	Material          material;
 	BoundingSphere    bounds;
 	CaseBehavior[]    behave;
-	CamBehavior	  camBehave;
+	CamBehavior	      camBehave;
 	
 	// Images
 	public ArrayList<String>   images;
