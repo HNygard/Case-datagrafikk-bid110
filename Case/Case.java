@@ -1004,8 +1004,8 @@ public class Case extends JFrame implements KeyListener {
 		else
 		{
 			BufferedImage bi = new BufferedImage(
-					img.getWidth(null), 
-					img.getHeight(null), 
+					256, 
+					256, 
 					BufferedImage.TYPE_INT_RGB);
 			Graphics2D g2 = bi.createGraphics();
 			g2.drawImage(img, null, null);
