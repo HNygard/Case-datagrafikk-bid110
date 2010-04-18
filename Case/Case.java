@@ -7,6 +7,8 @@ import javax.vecmath.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -23,6 +25,7 @@ import javax.media.j3d.*;
 import javax.media.util.BufferToImage;
 
 import com.sun.j3d.utils.picking.PickCanvas;
+import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
@@ -41,7 +44,7 @@ import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageDecoder;
 
 
-public class Case extends JFrame implements KeyListener {
+public class Case extends JFrame implements KeyListener, MouseListener {
 	public static void main(String[] s) {
 		
 		
@@ -164,6 +167,7 @@ public class Case extends JFrame implements KeyListener {
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
 		Canvas3D cv = new Canvas3D(gc);
 		cv.addKeyListener(this);
+		cv.addMouseListener(this);
 		add(cv, BorderLayout.CENTER);
 		BranchGroup bg = createSceneGraph();
 		bg.compile();
@@ -1073,5 +1077,35 @@ public class Case extends JFrame implements KeyListener {
 
 		// Added:
 		System.out.println("Keypress: " + keyString);
+	}
+
+	@Override
+	public void mouseClicked(java.awt.event.MouseEvent mouseEvent) {
+		System.out.println("Picking pågår:D");
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }
