@@ -5,6 +5,8 @@ import javax.swing.JOptionPane;
 import javax.vecmath.*;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -35,7 +37,7 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Vector;
 
-public class Case extends JFrame {
+public class Case extends JFrame implements KeyListener {
 	public static void main(String[] s) {
 		
 		
@@ -58,10 +60,11 @@ public class Case extends JFrame {
 		new Case(saveDir);
 	}
 	
-	public Case(String saveDir) {
-
+	public Case(String saveDir)
+	{
+		// JFrame
 		setLayout(new BorderLayout());
-		
+		addKeyListener(this);
 		
 		// Settings
 		this.saveDirectory = saveDir;
@@ -910,5 +913,84 @@ public class Case extends JFrame {
 		img = btoi.createImage(buf);
 		
 		return img;
+	}
+	
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == 67) // C 
+		{
+			this.captureImage();
+		}
+		
+		else if(e.getKeyCode() == 27) // Escape
+		{
+			System.out.println("Escape pressed, exiting");
+			System.exit(0);
+		}
+		
+		else {
+			displayInfo(e, "KEY TYPED: ");
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		
+	}
+	
+	private void displayInfo(KeyEvent e, String keyStatus) {
+		// Method copied from http://java.sun.com/docs/books/tutorial/uiswing/events/keylistener.html
+
+		//You should only rely on the key char if the event
+		//is a key typed event.
+		int id = e.getID();
+		String keyString;
+		if (id == KeyEvent.KEY_TYPED) {
+			char c = e.getKeyChar();
+			keyString = "key character = '" + c + "'";
+		} else {
+			int keyCode = e.getKeyCode();
+			keyString = "key code = " + keyCode + " ("
+					+ KeyEvent.getKeyText(keyCode) + ")";
+		}
+
+		int modifiersEx = e.getModifiersEx();
+		String modString = "extended modifiers = " + modifiersEx;
+		String tmpString = KeyEvent.getModifiersExText(modifiersEx);
+		if (tmpString.length() > 0) {
+			modString += " (" + tmpString + ")";
+		} else {
+			modString += " (no extended modifiers)";
+		}
+
+		String actionString = "action key? ";
+		if (e.isActionKey()) {
+			actionString += "YES";
+		} else {
+			actionString += "NO";
+		}
+
+		String locationString = "key location: ";
+		int location = e.getKeyLocation();
+		if (location == KeyEvent.KEY_LOCATION_STANDARD) {
+			locationString += "standard";
+		} else if (location == KeyEvent.KEY_LOCATION_LEFT) {
+			locationString += "left";
+		} else if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+			locationString += "right";
+		} else if (location == KeyEvent.KEY_LOCATION_NUMPAD) {
+			locationString += "numpad";
+		} else { // (location == KeyEvent.KEY_LOCATION_UNKNOWN)
+			locationString += "unknown";
+		}
+
+		// Added:
+		System.out.println("Keypress: " + keyString);
 	}
 }
