@@ -863,7 +863,7 @@ public class Case extends JFrame implements KeyListener {
 		}
 		
 		String path = images.get(imagenum);
-		System.out.println("Path - getImage: " + path);
+		//System.out.println("Path - getImage: " + path);
 		try {
 			return ImageIO.read(new File(path));
 		} catch (IOException e) {
@@ -903,23 +903,31 @@ public class Case extends JFrame implements KeyListener {
 		btoi = new BufferToImage((VideoFormat) buf.getFormat());
 		img = btoi.createImage(buf);
 		
-		// save image
-		saveJPG(img, savepath);
-		
-		// show the image
-		//imgpanel.setImage(img);
-		
-		//images.add(img);
-		images.add(savepath);
-		
-		if(images_lastadded.size() >= lastadded_max)
+		if(img == null)
 		{
-			// Remove last
-			images_lastadded.remove(images_lastadded.size()-1);
+			JOptionPane.showMessageDialog(null, "Feil med kamera. Fikk null img");
 		}
-
-		images_lastadded.add(0, images.size()-1);
-		images_nevershown .add(0, images.size()-1);
+		else
+		{
+			
+			// save image
+			saveJPG(img.getScaledInstance(265, 265, Image.SCALE_SMOOTH), savepath);
+			
+			// show the image
+			//imgpanel.setImage(img);
+			
+			//images.add(img);
+			images.add(savepath);
+			
+			if(images_lastadded.size() >= lastadded_max)
+			{
+				// Remove last
+				images_lastadded.remove(images_lastadded.size()-1);
+			}
+	
+			images_lastadded.add(0, images.size()-1);
+			images_nevershown .add(0, images.size()-1);
+		}
 	}
 	
 	public String getDateFormatNow(String dateFormat)
@@ -973,7 +981,10 @@ public class Case extends JFrame implements KeyListener {
 		img = btoi.createImage(buf);
 		
 		if(img == null)
+		{
+			System.out.println("Feil med henting av bilde fra kamera. img == null");
 			return getNoCamImage();
+		}
 		else
 			return img.getScaledInstance(256, 256, Image.SCALE_FAST);
 	}
