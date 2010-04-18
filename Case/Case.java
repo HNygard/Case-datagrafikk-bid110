@@ -2,11 +2,9 @@ package Case;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.vecmath.*;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -16,7 +14,6 @@ import javax.media.control.FrameGrabbingControl;
 import javax.media.format.VideoFormat;
 import javax.media.j3d.*;
 import javax.media.util.BufferToImage;
-import javax.print.attribute.standard.SheetCollate;
 
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickTool;
@@ -24,18 +21,13 @@ import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
 
-import java.applet.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
-
-import com.sun.j3d.utils.applet.MainFrame;
-import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 
 public class Case extends JFrame {
 	public static void main(String[] s) {
