@@ -286,6 +286,7 @@ public class Case extends JFrame implements KeyListener {
 			webcamBox = makeShape();
 			camBehave = new CamBehavior(webcamBox);
 			camBehave.setSchedulingBounds(bounds);
+			testTransform.addChild(webcamBox);
 		}
 		
 		/*
