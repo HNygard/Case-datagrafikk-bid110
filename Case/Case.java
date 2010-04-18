@@ -72,10 +72,10 @@ public class Case extends JFrame {
 		su.getViewingPlatform().setNominalViewingTransform();
 		
 		//Skjermbevegelse
-		OrbitBehavior orbit = new OrbitBehavior(cv);
+		/*OrbitBehavior orbit = new OrbitBehavior(cv);
 	    orbit.setSchedulingBounds(new BoundingSphere());
 	    su.getViewingPlatform().setViewPlatformBehavior(orbit);
-		
+		*/
 	    su.addBranchGraph(bg);
 	    
 	    // JFrame stuff
