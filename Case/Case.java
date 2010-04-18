@@ -7,9 +7,15 @@ import javax.vecmath.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
+import javax.media.Buffer;
+import javax.media.Player;
+import javax.media.control.FrameGrabbingControl;
+import javax.media.format.VideoFormat;
 import javax.media.j3d.*;
+import javax.media.util.BufferToImage;
 import javax.print.attribute.standard.SheetCollate;
 
 import com.sun.j3d.utils.picking.PickCanvas;
@@ -20,9 +26,12 @@ import com.sun.j3d.utils.image.TextureLoader;
 
 import java.applet.*;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Enumeration;
 
 import com.sun.j3d.utils.applet.MainFrame;
@@ -104,9 +113,21 @@ public class Case extends JFrame {
 	
 	
 	// Images
-	protected ArrayList<String>   images;
-	protected ArrayList<Integer>  images_used;
+	public ArrayList<String>   images;
+	public ArrayList<Integer>  images_used;
+	public ArrayList<Integer>  images_lastadded; // Last added, intergers refering to images
+	public int lastadded_max = 20; // How many images is considered "lastadded"
+	public int randomImageNum_maxTries = 100;
 	
+	public int lastImg = 0;
+	
+	public ArrayList<Integer> images_nevershown; // New images that are never shown before
+	
+	// Webcam
+	public static Player player;
+	public Buffer buf;
+	public Image img;
+	public BufferToImage btoi;
 
 	private BranchGroup createSceneGraph() {
 		int n = 5;
@@ -266,6 +287,8 @@ public class Case extends JFrame {
 		float[] knots = { 0.0f, 0.3f, 0.5f, 0.7f, 1.0f };
 		Quat4f[] quats = new Quat4f[5];
 		Point3f[] positions = new Point3f[5];
+		
+		// Sizes:
 		float[] scales = {0.4f, 0.4f, 2.0f, 0.4f, 0.4f};
 		
 		AxisAngle4f axis = new AxisAngle4f(1.0f, 0.0f, 0.0f, 0.0f);
@@ -277,26 +300,29 @@ public class Case extends JFrame {
 		quats[3] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[4] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		
-		float avstand_ytre  = 0.5f;
-		float avstand_indre = 0.2f;
+		float avstand_ytre  = 0.5f*5;
+		float avstand_indre = 0.2f*5;
 		double theta = Math.random()* 2 * Math.PI;
 		positions[0] = new Point3f(
 				(float) (-avstand_ytre * Math.cos(theta)),
 				(float) (-avstand_ytre * Math.sin(theta)),
-				0.0f);
+				-1.0f);
 		positions[1] = new Point3f(
 				(float) (-avstand_indre * Math.cos(theta)),
 				(float) (-avstand_indre * Math.sin(theta)),
-				0.0f);
-		positions[2] = new Point3f(0.0f, 0.0f, 0.0f);
+				-1.0f);
+		positions[2] = new Point3f(
+				0.0f,
+				0.0f, 
+				-1.0f);
 		positions[3] = new Point3f(
 				(float) (avstand_indre * Math.cos(theta)),
 				(float) (avstand_indre * Math.sin(theta)),
-				0.0f);
+				-1.0f);
 		positions[4] = new Point3f(
 				(float) (avstand_ytre * Math.cos(theta)),
 				(float) (avstand_ytre * Math.sin(theta)),
-				0.0f);
+				-1.0f);
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
 				shapeMove, axisOfRotPos, knots, quats, positions, scales);
 		rotPosScalePath.setSchedulingBounds(bounds);
@@ -642,5 +668,73 @@ public class Case extends JFrame {
 	public Image getRandomImage()
 	{
 		return getImage((int)(Math.random()*images.size()));
+	}
+	
+	public void captureImage()
+	{
+		String savepath = this.saveDirectory + "\\cam"
+		+ this.getDateFormatNow("yyyyMMdd_HHmmss-S") + ".jpg";
+		System.out.println("Capturing current image to " +savepath);
+		
+		// Grab a frame
+		FrameGrabbingControl fgc = (FrameGrabbingControl) player
+				.getControl("javax.media.control.FrameGrabbingControl");
+		buf = fgc.grabFrame();
+		
+		// Convert it to an image
+		btoi = new BufferToImage((VideoFormat) buf.getFormat());
+		img = btoi.createImage(buf);
+		
+		// save image
+		saveJPG(img, savepath);
+		
+		// show the image
+		//imgpanel.setImage(img);
+		
+		//images.add(img);
+		images.add(savepath);
+		
+		if(images_lastadded.size() >= lastadded_max)
+		{
+			// Remove last
+			images_lastadded.remove(images_lastadded.size()-1);
+		}
+
+		images_lastadded.add(0, images.size()-1);
+		images_nevershown .add(0, images.size()-1);
+	}
+	
+	public String getDateFormatNow(String dateFormat)
+	{
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+		return sdf.format(Calendar.getInstance().getTime());
+	}
+	
+	public static void saveJPG(Image img, String s) {
+		BufferedImage bi = new BufferedImage(
+				img.getWidth(null), 
+				img.getHeight(null), 
+				BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = bi.createGraphics();
+		g2.drawImage(img, null, null);
+
+		FileOutputStream out = null;
+		try {
+			out = new FileOutputStream(s);
+		} catch (java.io.FileNotFoundException io) {
+			System.out.println("File Not Found");
+		}
+/*
+		JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+		JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(bi);
+		param.setQuality(0.5f, false);
+		encoder.setJPEGEncodeParam(param);
+
+		try {
+			encoder.encode(bi);
+			out.close();
+		} catch (java.io.IOException io) {
+			System.out.println("IOException");
+		}*/
 	}
 }
