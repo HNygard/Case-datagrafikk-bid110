@@ -5,6 +5,8 @@ import javax.swing.JOptionPane;
 import javax.vecmath.*;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -35,7 +37,7 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Vector;
 
-public class Case extends JFrame {
+public class Case extends JFrame implements KeyListener {
 	public static void main(String[] s) {
 		
 		
@@ -58,10 +60,11 @@ public class Case extends JFrame {
 		new Case(saveDir);
 	}
 	
-	public Case(String saveDir) {
-
+	public Case(String saveDir)
+	{
+		// JFrame
 		setLayout(new BorderLayout());
-		
+		addKeyListener(this);
 		
 		// Settings
 		this.saveDirectory = saveDir;
@@ -723,6 +726,74 @@ public class Case extends JFrame {
 		
 	}
 	
+	public class CamBehavior extends Behavior 
+	{
+		Shape3D shape;
+		
+		public CamBehavior (Shape3D shape)
+		{
+			this.shape = shape;
+		}
+
+		@Override
+		public void initialize()
+		{
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+
+		@Override
+		public void processStimulus(Enumeration arg0)
+		{
+			shape.setAppearance(createCamAppearance());
+			
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+		
+	}
+	
+	public Appearance createCamAppearance() {
+		Appearance appear = new Appearance();
+		/*
+		URL filename;
+		if(Math.random() > 0.5)
+			filename = getClass().getClassLoader().getResource(
+			"images/earth.jpg");
+		else
+			filename = getClass().getClassLoader().getResource(
+				"images/stone.jpg");*/
+		
+		TextureLoader loader = new TextureLoader(getCamImage(), this);
+		ImageComponent2D image = loader.getImage();
+		
+
+	    TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
+		TexCoordGeneration.TEXTURE_COORDINATE_3);
+		tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
+		tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
+		tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
+		appear.setTexCoordGeneration(tcg);
+		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
+		
+		TextureCubeMap texture = new TextureCubeMap(Texture.BASE_LEVEL, Texture.RGBA,
+				 image.getWidth());
+		texture.setEnable(true);
+		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
+		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
+	    appear.setTexture(texture);
+	    			  
+		// definerer bilde for hver av sidene for firkant
+	    texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
+	    texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
+	    texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
+	    texture.setImage(0, TextureCubeMap.POSITIVE_X, image);
+	    texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
+	    texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);  
+	    
+		return appear;
+	}
+	
 	protected void getImages() {
 		File directory = new File(this.saveDirectory);
 
@@ -834,5 +905,98 @@ public class Case extends JFrame {
 		} catch (java.io.IOException io) {
 			System.out.println("IOException");
 		}*/
+	}
+	
+	public Image getCamImage ()
+	{
+		// Grab a frame
+		FrameGrabbingControl fgc = (FrameGrabbingControl) player
+				.getControl("javax.media.control.FrameGrabbingControl");
+		buf = fgc.grabFrame();
+		
+		// Convert it to an image
+		btoi = new BufferToImage((VideoFormat) buf.getFormat());
+		img = btoi.createImage(buf);
+		
+		return img;
+	}
+	
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == 67) // C 
+		{
+			this.captureImage();
+		}
+		
+		else if(e.getKeyCode() == 27) // Escape
+		{
+			System.out.println("Escape pressed, exiting");
+			System.exit(0);
+		}
+		
+		else {
+			displayInfo(e, "KEY TYPED: ");
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		
+	}
+	
+	private void displayInfo(KeyEvent e, String keyStatus) {
+		// Method copied from http://java.sun.com/docs/books/tutorial/uiswing/events/keylistener.html
+
+		//You should only rely on the key char if the event
+		//is a key typed event.
+		int id = e.getID();
+		String keyString;
+		if (id == KeyEvent.KEY_TYPED) {
+			char c = e.getKeyChar();
+			keyString = "key character = '" + c + "'";
+		} else {
+			int keyCode = e.getKeyCode();
+			keyString = "key code = " + keyCode + " ("
+					+ KeyEvent.getKeyText(keyCode) + ")";
+		}
+
+		int modifiersEx = e.getModifiersEx();
+		String modString = "extended modifiers = " + modifiersEx;
+		String tmpString = KeyEvent.getModifiersExText(modifiersEx);
+		if (tmpString.length() > 0) {
+			modString += " (" + tmpString + ")";
+		} else {
+			modString += " (no extended modifiers)";
+		}
+
+		String actionString = "action key? ";
+		if (e.isActionKey()) {
+			actionString += "YES";
+		} else {
+			actionString += "NO";
+		}
+
+		String locationString = "key location: ";
+		int location = e.getKeyLocation();
+		if (location == KeyEvent.KEY_LOCATION_STANDARD) {
+			locationString += "standard";
+		} else if (location == KeyEvent.KEY_LOCATION_LEFT) {
+			locationString += "left";
+		} else if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+			locationString += "right";
+		} else if (location == KeyEvent.KEY_LOCATION_NUMPAD) {
+			locationString += "numpad";
+		} else { // (location == KeyEvent.KEY_LOCATION_UNKNOWN)
+			locationString += "unknown";
+		}
+
+		// Added:
+		System.out.println("Keypress: " + keyString);
 	}
 }
