@@ -37,6 +37,10 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageDecoder;
+
+
 public class Case extends JFrame implements KeyListener {
 	public static void main(String[] s) {
 		
@@ -950,7 +954,7 @@ public class Case extends JFrame implements KeyListener {
 		} catch (java.io.FileNotFoundException io) {
 			System.out.println("File Not Found");
 		}
-/*
+		
 		JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
 		JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(bi);
 		param.setQuality(0.5f, false);
@@ -961,7 +965,7 @@ public class Case extends JFrame implements KeyListener {
 			out.close();
 		} catch (java.io.IOException io) {
 			System.out.println("IOException");
-		}*/
+		}
 	}
 	
 	public Image getCamImage ()
