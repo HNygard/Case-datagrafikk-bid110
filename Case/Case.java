@@ -83,6 +83,9 @@ public class Case extends JFrame {
 		setTitle("Caseoppgave - Datagrafikk ved UiS - Hallvard, Gunnstein og Stefan");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		
+
+		
 		//setUndecorated(true);
 		pack();
 		setSize(800, 800);
