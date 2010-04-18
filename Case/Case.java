@@ -41,7 +41,8 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageDecoder;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import com.sun.image.codec.jpeg.JPEGEncodeParam;
 
 
 public class Case extends JFrame implements KeyListener, MouseListener {
