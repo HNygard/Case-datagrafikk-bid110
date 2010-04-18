@@ -28,6 +28,7 @@ import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.*;
+import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
 
@@ -247,6 +248,14 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
+		// rotere enkelte objekter
+	    /*testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+	    testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		MouseRotate rotator1 = new MouseRotate(testTransform);
+	    BoundingSphere bounds = new BoundingSphere();
+	    rotator1.setSchedulingBounds(bounds);
+	    testTransform.addChild(rotator1);
+		*/
 		
 		//Spin
 		root.addChild(testTransform);
@@ -751,7 +760,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		{
 			int shapeType = (int)(Math.random()*2);
 			shape.setGeometry(getGeometry(shapeType));
-			shape.setAppearance(createAppearance(shapeType));
+			//shape.setAppearance(createAppearance(shapeType));
 			
 			// TODO: remove old child
 			//shapeMove.addChild(makeRotPosTingen(shapeMove));
@@ -1083,7 +1092,15 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	@Override
 	public void mouseClicked(java.awt.event.MouseEvent mouseEvent) {
 		System.out.println("Picking pågår:D");
-		
+		pc.setShapeLocation(mouseEvent);
+		PickResult[] results = pc.pickAll();
+		for (int i = 0; (results != null) && (i < results.length); i++) {
+			Node node = results[i].getObject();
+			if (node instanceof Shape3D) {
+				((Shape3D) node).setAppearance(createAppearance(2));
+				System.out.println(node.toString());
+			}
+		}
 	}
 
 	@Override
