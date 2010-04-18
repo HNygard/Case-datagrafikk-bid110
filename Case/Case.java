@@ -982,11 +982,11 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		}
 	}
 	
-	public Image getCamImage ()
+	public BufferedImage getCamImage ()
 	{
 		if(!cameraFound)
 		{
-			return getNoCamImage();
+			return (BufferedImage)getNoCamImage();
 		}
 		
 		// Grab a frame
@@ -1001,10 +1001,20 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		if(img == null)
 		{
 			System.out.println("Feil med henting av bilde fra kamera. img == null");
-			return getNoCamImage();
+			return (BufferedImage)getNoCamImage();
 		}
 		else
-			return img.getScaledInstance(256, 256, Image.SCALE_FAST);
+		{
+			BufferedImage bi = new BufferedImage(
+					img.getWidth(null), 
+					img.getHeight(null), 
+					BufferedImage.TYPE_INT_RGB);
+			Graphics2D g2 = bi.createGraphics();
+			g2.drawImage(img, null, null);
+
+			return bi;
+			//return img.getScaledInstance(256, 256, Image.SCALE_FAST);
+		}
 	}
 	
 
