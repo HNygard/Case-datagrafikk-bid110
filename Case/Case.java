@@ -222,6 +222,7 @@ public class Case extends JFrame implements KeyListener {
 	protected Component comp;
 	
 	public boolean cameraFound;
+	public String noCamImage;
 	
 
 	private BranchGroup createSceneGraph() {
@@ -281,13 +282,14 @@ public class Case extends JFrame implements KeyListener {
 			testTransform.addChild(shapeMove[i]);
 			root.addChild(behave[i]);
 		}
-		if (cameraFound){
-			Shape3D webcamBox = new Shape3D();
-			webcamBox = makeCamShape();
-			camBehave = new CamBehavior(webcamBox);
-			camBehave.setSchedulingBounds(bounds);
-			testTransform.addChild(webcamBox);
-		}
+		
+		// Webcam box
+		Shape3D webcamBox = new Shape3D();
+		webcamBox = makeCamShape();
+		camBehave = new CamBehavior(webcamBox);
+		camBehave.setSchedulingBounds(bounds);
+		root.addChild(camBehave);
+		testTransform.addChild(webcamBox);
 		
 		/*
 		SharedGroup sg = new SharedGroup();
@@ -801,20 +803,16 @@ public class Case extends JFrame implements KeyListener {
 		appear.setTexCoordGeneration(tcg);
 		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
 		
-		TextureCubeMap texture = new TextureCubeMap(Texture.BASE_LEVEL, Texture.RGBA,
-				 image.getWidth());
-		texture.setEnable(true);
-		texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-		texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
-	    appear.setTexture(texture);
-	    			  
-		// definerer bilde for hver av sidene for firkant
-	    texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
-	    texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
-	    texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
-	    texture.setImage(0, TextureCubeMap.POSITIVE_X, image);
-	    texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
-	    texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);  
+		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
+		image.getWidth(), image.getHeight());
+		texture.setImage(0, image);
+		tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
+		appear.setMaterial(material);
+		appear.setTexCoordGeneration(tcg);
+		appear.setTransparencyAttributes(new TransparencyAttributes(
+				TransparencyAttributes.BLENDED, 0.0f));
+
+	    appear.setTexture(texture); 
 	    
 		return appear;
 	}
@@ -825,6 +823,7 @@ public class Case extends JFrame implements KeyListener {
 		//BufferedImage img = null;
 		
 		images = new ArrayList<String>();
+		boolean noCamFound = false;
 		if( directory.exists() && directory.isDirectory())
 		{
 			//File[] files = directory.listFiles();
@@ -834,9 +833,23 @@ public class Case extends JFrame implements KeyListener {
 			{
 				if(files[i].endsWith("jpg"))
 				{
-					images.add(this.saveDirectory + File.separator + files[i]);
+					if(files[i].equals("feilmedkamera.jpg"))
+					{
+						noCamImage = this.saveDirectory + File.separator + files[i];
+						noCamFound = true;
+					}
+					else
+					{
+						images.add(this.saveDirectory + File.separator + files[i]);
+					}
 				}
 			}
+		}
+		
+		if(!noCamFound)
+		{
+			System.out.println("feilmedkamera.jpg not found in image folder. Using a random image as feilmedkamera.jpg");
+			noCamImage = images.get((int)(Math.random()*images.size()));
 		}
 		
 		System.out.println("Total image count = " + images.size());
@@ -855,6 +868,17 @@ public class Case extends JFrame implements KeyListener {
 			return ImageIO.read(new File(path));
 		} catch (IOException e) {
 			System.out.println("Path til ikke funnet: " + path);
+			return null;
+		}
+	}
+	
+	public Image getNoCamImage()
+	{
+		System.out.println("Path - getNoCamImage: " + noCamImage);
+		try {
+			return ImageIO.read(new File(noCamImage));
+		} catch (IOException e) {
+			System.out.println("Path til ikke funnet: " + noCamImage);
 			return null;
 		}
 	}
@@ -934,6 +958,11 @@ public class Case extends JFrame implements KeyListener {
 	
 	public Image getCamImage ()
 	{
+		if(!cameraFound)
+		{
+			return getNoCamImage();
+		}
+		
 		// Grab a frame
 		FrameGrabbingControl fgc = (FrameGrabbingControl) player
 				.getControl("javax.media.control.FrameGrabbingControl");
@@ -943,7 +972,10 @@ public class Case extends JFrame implements KeyListener {
 		btoi = new BufferToImage((VideoFormat) buf.getFormat());
 		img = btoi.createImage(buf);
 		
-		return img;
+		if(img == null)
+			return getNoCamImage();
+		else
+			return img;
 	}
 	
 
