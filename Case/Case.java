@@ -255,7 +255,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
-<<<<<<< HEAD
+
 		// rotere enkelte objekter
 	    /*testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 	    testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
@@ -264,12 +264,12 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	    rotator1.setSchedulingBounds(bounds);
 	    testTransform.addChild(rotator1);
 		*/
-=======
+
 		PickRotateBehavior rotatorObjekt = new PickRotateBehavior(root, cv, bounds, 
 			      PickTool.GEOMETRY);
 		root.addChild(rotatorObjekt);
 		
->>>>>>> gokland/master
+
 		
 		//Spin
 		root.addChild(testTransform);
@@ -317,12 +317,16 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		
 		// Webcam box
 		Shape3D webcamBox = new Shape3D();
+		TransformGroup wbTransform = new TransformGroup();
+		Transform3D webTr = new Transform3D();
+		webTr.setTranslation(new Vector3d(-0.5,0.5,0));
+		wbTransform.setTransform(webTr);
 		webcamBox = makeCamShape();
 		camBehave = new CamBehavior(webcamBox);
 		camBehave.setSchedulingBounds(bounds);
 		root.addChild(camBehave);
-		testTransform.addChild(webcamBox);
-		
+		wbTransform.addChild(webcamBox);
+		testTransform.addChild(wbTransform);
 		/*
 		SharedGroup sg = new SharedGroup();
 		// object
@@ -685,7 +689,6 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		
 		TextureLoader loader = new TextureLoader(getRandomImage(), this);
 		ImageComponent2D image = loader.getImage();
-
 		
 		boolean cube = (image.getWidth() == image.getHeight());
 
@@ -922,7 +925,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	{
 		return getImage((int)(Math.random()*images.size()));
 	}
-<<<<<<< HEAD
+
 	
 	public void captureImage()
 	{
@@ -1160,9 +1163,9 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
 	}
-}
-=======
-}
->>>>>>> gokland/master
+	}
+
+
+
+
