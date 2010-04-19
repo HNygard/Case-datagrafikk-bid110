@@ -196,15 +196,20 @@ public class Case extends JFrame implements KeyListener {
 	
 	// Settings
 	String            saveDirectory;
+	float             avstand_ytre  = 0.5f*5;
+	float             avstand_indre = 0.2f*5;
+	float             avstand_buffer = 0.5f;
 	
 	// Other stuff
 	PickCanvas        pc;
 	
 	TransformGroup[]  shapeMove;
 	Shape3D[]         shapes;
+	RotPosScalePathInterpolator[] rotPosScale;
 	Appearance[]      appearance;
 	Material          material;
 	BoundingSphere    bounds;
+	BoundingSphere    smallbounds;
 	CaseBehavior[]    behave;
 	CamBehavior	      camBehave;
 	
@@ -239,6 +244,8 @@ public class Case extends JFrame implements KeyListener {
 		/* root */
 		BranchGroup root = new BranchGroup();
 		bounds = new BoundingSphere();
+		smallbounds = new BoundingSphere();
+		smallbounds.setRadius(avstand_ytre);
 		
 		/* testTransform */
 		Transform3D tr = new Transform3D();
@@ -281,6 +288,7 @@ public class Case extends JFrame implements KeyListener {
 		// Make arrays
 		shapeMove   = new TransformGroup[n];
 		shapes      = new Shape3D[n];
+		rotPosScale = new RotPosScalePathInterpolator[n];
 		appearance  = new Appearance[n];
 		behave      = new CaseBehavior[n];
 		
@@ -355,13 +363,14 @@ public class Case extends JFrame implements KeyListener {
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
 		shapeMove[i].addChild(shapes[i]);
+		shapeMove[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
 		// Oppretter RotPosScaleIntepolator
-		shapeMove[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		shapeMove[i].addChild(makeRotPosTingen(shapeMove[i]));
+		rotPosScale[i] = makeRotPosTingen(shapeMove[i]);
+		shapeMove[i].addChild(rotPosScale[i]);
 		
 		// Oppretter Behavior
-		behave[i] = new CaseBehavior(shapes[i], shapeMove[i]);
+		behave[i] = new CaseBehavior(shapes[i], shapeMove[i], rotPosScale[i]);
 		behave[i].setSchedulingBounds(bounds);
 		
 	}
@@ -415,30 +424,30 @@ public class Case extends JFrame implements KeyListener {
 		shape.setAppearance(ap);
 		return shape;
 	}
-	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove)
+	
+	public float[] getRotPosKnots() 
 	{
-
-		Alpha alpha = new Alpha(-1, 8000);
-		Transform3D axisOfRotPos = new Transform3D();
 		float[] knots = { 0.0f, 0.3f, 0.5f, 0.7f, 1.0f };
+		return knots;
+	}
+	
+	public Quat4f[] getRotPosQuats() 
+	{
 		Quat4f[] quats = new Quat4f[5];
-		Point3f[] positions = new Point3f[5];
-		
-		// Sizes:
-		float[] scales = {0.4f, 0.4f, 2.0f, 0.4f, 0.4f};
-		
-		AxisAngle4f axis = new AxisAngle4f(1.0f, 0.0f, 0.0f, 0.0f);
-		axisOfRotPos.set(axis);
-		
 		quats[0] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[1] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[2] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[3] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[4] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		
-		float avstand_ytre  = 0.5f*5;
-		float avstand_indre = 0.2f*5;
+		return quats;
+	}
+	
+	public Point3f[] getRandomPositionsTilRotPos ()
+	{
 		double theta = Math.random()* 2 * Math.PI;
+		
+		Point3f[] positions = new Point3f[5];
 		positions[0] = new Point3f(
 				(float) (-avstand_ytre * Math.cos(theta)),
 				(float) (-avstand_ytre * Math.sin(theta)),
@@ -459,8 +468,27 @@ public class Case extends JFrame implements KeyListener {
 				(float) (avstand_ytre * Math.cos(theta)),
 				(float) (avstand_ytre * Math.sin(theta)),
 				-1.0f);
+		
+		return positions;
+	}
+	
+	public float[] getRotPosScales ()
+	{
+		float[] scales = {0.4f, 0.4f, 2.0f, 0.4f, 0.4f};
+		return scales;
+	}
+	
+	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove)
+	{
+
+		Alpha alpha = new Alpha(-1, 8000);
+		Transform3D axisOfRotPos = new Transform3D();
+		
+		AxisAngle4f axis = new AxisAngle4f(1.0f, 0.0f, 0.0f, 0.0f);
+		axisOfRotPos.set(axis);
+		
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
-				shapeMove, axisOfRotPos, knots, quats, positions, scales);
+				shapeMove, axisOfRotPos, getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(), getRotPosScales());
 		rotPosScalePath.setSchedulingBounds(bounds);
 		
 		return rotPosScalePath;
@@ -731,32 +759,48 @@ public class Case extends JFrame implements KeyListener {
 	{
 		Shape3D shape;
 		TransformGroup shapeMove;
+		RotPosScalePathInterpolator rotPos;
 		
-		public CaseBehavior (Shape3D shape, TransformGroup shapeMove)
+		public CaseBehavior (Shape3D shape, TransformGroup shapeMove, RotPosScalePathInterpolator ting)
 		{
 			this.shape = shape;
 			this.shapeMove = shapeMove;
+			this.rotPos = ting;
 		}
 
 		@Override
 		public void initialize()
 		{
 			// Time for testing purpose
-			wakeupOn(new WakeupOnElapsedTime((int)(Math.random()*5000) + 1000));
+			wakeupOn(new WakeupOnElapsedTime(50));
 		}
 
 		@Override
 		public void processStimulus(Enumeration arg0)
 		{
-			int shapeType = (int)(Math.random()*2);
-			shape.setGeometry(getGeometry(shapeType));
-			shape.setAppearance(createAppearance(shapeType));
+			Transform3D grpTransform = new Transform3D();
+			shapeMove.getTransform(grpTransform);
+
+			Vector3f location= new Vector3f();
+			grpTransform .get(location);
 			
-			// TODO: remove old child
-			//shapeMove.addChild(makeRotPosTingen(shapeMove));
+			double avstand = Math.sqrt(location.getX()*location.getX() + location.getY()*location.getY());
+			if(avstand > (avstand_ytre-avstand_buffer))
+			{
+				int shapeType = (int)(Math.random()*2);
+				
+				// Get random geometry
+				shape.setGeometry(getGeometry(shapeType));
+				
+				// Get new appearance (new image/texture)
+				shape.setAppearance(createAppearance(shapeType));
+				
+				// Set new path
+				rotPos.setPathArrays(getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(), getRotPosScales());
+			}
 			
 			// Time for testing purpose
-			wakeupOn(new WakeupOnElapsedTime((int)(Math.random()*5000) + 1000));
+			wakeupOn(new WakeupOnElapsedTime(50));
 		}
 		
 	}
@@ -871,7 +915,7 @@ public class Case extends JFrame implements KeyListener {
 		}
 		
 		String path = images.get(imagenum);
-		//System.out.println("Path - getImage: " + path);
+		System.out.println("Path - getImage: " + path);
 		try {
 			return ImageIO.read(new File(path));
 		} catch (IOException e) {
@@ -882,7 +926,7 @@ public class Case extends JFrame implements KeyListener {
 	
 	public Image getNoCamImage()
 	{
-		System.out.println("Path - getNoCamImage: " + noCamImage);
+		//System.out.println("Path - getNoCamImage: " + noCamImage);
 		try {
 			return ImageIO.read(new File(noCamImage));
 		} catch (IOException e) {
