@@ -2,15 +2,27 @@ package Case;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.vecmath.*;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.media.Buffer;
+import javax.media.CaptureDeviceInfo;
+import javax.media.CaptureDeviceManager;
+import javax.media.Manager;
+import javax.media.MediaLocator;
+import javax.media.Player;
+import javax.media.control.FormatControl;
+import javax.media.control.FrameGrabbingControl;
+import javax.media.format.VideoFormat;
 import javax.media.j3d.*;
-import javax.print.attribute.standard.SheetCollate;
+import javax.media.util.BufferToImage;
 
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickTool;
@@ -19,17 +31,22 @@ import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
 
-import java.applet.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.Vector;
+/*
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import com.sun.image.codec.jpeg.JPEGEncodeParam;
+*/
 
-import com.sun.j3d.utils.applet.MainFrame;
-import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
-
-public class Case extends JFrame {
+public class Case extends JFrame implements KeyListener {
 	public static void main(String[] s) {
 		
 		
@@ -46,24 +63,112 @@ public class Case extends JFrame {
 						"the images is/will be saved\n\n" +
 						"Also possible to specifiy as argument 1 when " +
 						"running this program.",
-						 "c:\\jobbminnepinne\\webcamtest"); 
+						 ""); 
 		}
 		
 		new Case(saveDir);
 	}
 	
-	public Case(String saveDir) {
+	public Case(String saveDir)
+	{
+		// JFrame
+		setLayout(new BorderLayout());
 		
 		// Settings
 		this.saveDirectory = saveDir;
+		System.out.println("Using " + this.saveDirectory + " as directory.");
 		
-		// images
+		// Images
 		getImages();
 		
-		// create canvas
+		// Webcam
+		images_used = new ArrayList<Integer>();
+		images_lastadded = new ArrayList<Integer>();
+		images_nevershown = new ArrayList<Integer>();
+		
+		
+		Vector devices = (Vector) CaptureDeviceManager.getDeviceList(null).clone();
+		Enumeration enumeration = devices.elements();
+		System.out.println("- Available cameras -");
+		ArrayList<String> names = new ArrayList<String>();
+		while (enumeration.hasMoreElements())
+		{
+			CaptureDeviceInfo cdi = (CaptureDeviceInfo) enumeration.nextElement();
+			String name = cdi.getName();
+			if (name.startsWith("vfw:"))
+			{
+				names.add(name);
+				System.out.println(name);
+			}
+		}
+		
+		//String str1 = "vfw:Logitech USB Video Camera:0";
+		//String str2 = "vfw:Microsoft WDM Image Capture (Win32):0";
+		if(names.size() == 0) {
+			JOptionPane.showMessageDialog(null, "Ingen kamera funnet. " +
+					"Du bør koble til et kamera for å kjøre programmet optimalt.",
+					"Feil",
+					 JOptionPane.ERROR_MESSAGE); 
+			cameraFound = false;
+		}
+		else
+		{
+			cameraFound = true;
+			if (names.size() > 1)
+			{
+	
+				JOptionPane.showMessageDialog(null, 
+						"Fant mer enn 1 kamera. " +
+						"Velger da:\n" +
+						names.get(0),
+						"Advarsel",
+						 JOptionPane.WARNING_MESSAGE);
+			}
+		}
+		
+		if(cameraFound)
+		{
+			String str2 = names.get(0);
+			di = CaptureDeviceManager.getDevice(str2);
+			ml = di.getLocator();
+			
+			try {
+				player = Manager.createRealizedPlayer(ml);
+				formatControl = (FormatControl)player.getControl(
+	            "javax.media.control.FormatControl");
+				
+				/*
+				Format[] formats = formatControl.getSupportedFormats();
+				for (int i=0; i<formats.length; i++)
+					System.out.println(formats[i].toString());
+				*/
+				
+				player.start();
+			}
+			catch(javax.media.NoPlayerException e) 
+			{
+				 JOptionPane.showMessageDialog(null, "Klarer ikke å starte"+
+						 " kamera. Sjekk at det er koblet til.", 
+						 "IOException", 
+						 JOptionPane.ERROR_MESSAGE); 
+				 System.exit(0);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				System.exit(0);
+			}
+			
+			if ((comp = player.getVisualComponent()) != null) {
+				add(comp, BorderLayout.EAST);
+			}
+		}
+		
+		
+		// Create canvas
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
 		Canvas3D cv = new Canvas3D(gc);
-		setLayout(new BorderLayout());
+		cv.addKeyListener(this);
 		add(cv, BorderLayout.CENTER);
 		BranchGroup bg = createSceneGraph(cv);
 		bg.compile();
@@ -73,10 +178,10 @@ public class Case extends JFrame {
 		su.getViewingPlatform().setNominalViewingTransform();
 		
 		//Skjermbevegelse
-		OrbitBehavior orbit = new OrbitBehavior(cv);
+		/*OrbitBehavior orbit = new OrbitBehavior(cv);
 	    orbit.setSchedulingBounds(new BoundingSphere());
 	    su.getViewingPlatform().setViewPlatformBehavior(orbit);
-		
+		*/
 	    su.addBranchGraph(bg);
 	    
 	    // JFrame stuff
@@ -105,11 +210,31 @@ public class Case extends JFrame {
 	Material          material;
 	BoundingSphere    bounds;
 	CaseBehavior[]    behave;
-	
+	CamBehavior	      camBehave;
 	
 	// Images
-	protected ArrayList<String>   images;
-	protected ArrayList<Integer>  images_used;
+	public ArrayList<String>   images;
+	public ArrayList<Integer>  images_used;
+	public ArrayList<Integer>  images_lastadded; // Last added, intergers refering to images
+	public int lastadded_max = 20; // How many images is considered "lastadded"
+	public int randomImageNum_maxTries = 100;
+	
+	public int lastImg = 0;
+	
+	public ArrayList<Integer> images_nevershown; // New images that are never shown before
+	
+	// Webcam
+	public static Player player;
+	public Buffer buf;
+	public Image img;
+	public BufferToImage btoi;
+	public CaptureDeviceInfo di;
+	public MediaLocator ml;
+	public FormatControl formatControl;
+	protected Component comp;
+	
+	public boolean cameraFound;
+	public String noCamImage;
 	
 
 	private BranchGroup createSceneGraph(Canvas3D cv) {
@@ -173,6 +298,14 @@ public class Case extends JFrame {
 			testTransform.addChild(shapeMove[i]);
 			root.addChild(behave[i]);
 		}
+		
+		// Webcam box
+		Shape3D webcamBox = new Shape3D();
+		webcamBox = makeCamShape();
+		camBehave = new CamBehavior(webcamBox);
+		camBehave.setSchedulingBounds(bounds);
+		root.addChild(camBehave);
+		testTransform.addChild(webcamBox);
 		
 		/*
 		SharedGroup sg = new SharedGroup();
@@ -269,6 +402,30 @@ public class Case extends JFrame {
 		return shape;
 	}
 	
+	public Shape3D makeCamShape ()
+	{
+		int shapeType = 0;
+		Appearance ap = createCamAppearance();
+		/*
+		return new Box(
+				(float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()),
+				(float) (0.05f * Math.random()),
+					Primitive.ENABLE_GEOMETRY_PICKING |
+					Primitive.ENABLE_APPEARANCE_MODIFY |
+					Primitive.GENERATE_NORMALS |
+					Primitive.GENERATE_TEXTURE_COORDS,ap);
+					   Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
+					*/
+		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
+		
+		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
+		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+		shape.setAppearance(ap);
+		return shape;
+	}
 	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove)
 	{
 
@@ -277,6 +434,8 @@ public class Case extends JFrame {
 		float[] knots = { 0.0f, 0.3f, 0.5f, 0.7f, 1.0f };
 		Quat4f[] quats = new Quat4f[5];
 		Point3f[] positions = new Point3f[5];
+		
+		// Sizes:
 		float[] scales = {0.4f, 0.4f, 2.0f, 0.4f, 0.4f};
 		
 		AxisAngle4f axis = new AxisAngle4f(1.0f, 0.0f, 0.0f, 0.0f);
@@ -288,26 +447,29 @@ public class Case extends JFrame {
 		quats[3] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		quats[4] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
 		
-		float avstand_ytre  = 0.5f;
-		float avstand_indre = 0.2f;
+		float avstand_ytre  = 0.5f*5;
+		float avstand_indre = 0.2f*5;
 		double theta = Math.random()* 2 * Math.PI;
 		positions[0] = new Point3f(
 				(float) (-avstand_ytre * Math.cos(theta)),
 				(float) (-avstand_ytre * Math.sin(theta)),
-				0.0f);
+				-1.0f);
 		positions[1] = new Point3f(
 				(float) (-avstand_indre * Math.cos(theta)),
 				(float) (-avstand_indre * Math.sin(theta)),
-				0.0f);
-		positions[2] = new Point3f(0.0f, 0.0f, 0.0f);
+				-1.0f);
+		positions[2] = new Point3f(
+				0.0f,
+				0.0f, 
+				-1.0f);
 		positions[3] = new Point3f(
 				(float) (avstand_indre * Math.cos(theta)),
 				(float) (avstand_indre * Math.sin(theta)),
-				0.0f);
+				-1.0f);
 		positions[4] = new Point3f(
 				(float) (avstand_ytre * Math.cos(theta)),
 				(float) (avstand_ytre * Math.sin(theta)),
-				0.0f);
+				-1.0f);
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
 				shapeMove, axisOfRotPos, knots, quats, positions, scales);
 		rotPosScalePath.setSchedulingBounds(bounds);
@@ -610,12 +772,77 @@ public class Case extends JFrame {
 		
 	}
 	
+	public class CamBehavior extends Behavior 
+	{
+		Shape3D shape;
+		
+		public CamBehavior (Shape3D shape)
+		{
+			this.shape = shape;
+		}
+
+		@Override
+		public void initialize()
+		{
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+
+		@Override
+		public void processStimulus(Enumeration arg0)
+		{
+			shape.setAppearance(createCamAppearance());
+			
+			// Time for testing purpose
+			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+		
+	}
+	
+	public Appearance createCamAppearance() {
+		Appearance appear = new Appearance();
+		/*
+		URL filename;
+		if(Math.random() > 0.5)
+			filename = getClass().getClassLoader().getResource(
+			"images/earth.jpg");
+		else
+			filename = getClass().getClassLoader().getResource(
+				"images/stone.jpg");*/
+		
+		TextureLoader loader = new TextureLoader(getCamImage(), this);
+		ImageComponent2D image = loader.getImage();
+		
+
+	    TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
+		TexCoordGeneration.TEXTURE_COORDINATE_3);
+		tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
+		tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
+		tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
+		appear.setTexCoordGeneration(tcg);
+		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
+		
+		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
+		image.getWidth(), image.getHeight());
+		texture.setImage(0, image);
+		tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
+		appear.setMaterial(material);
+		appear.setTexCoordGeneration(tcg);
+		appear.setTransparencyAttributes(new TransparencyAttributes(
+				TransparencyAttributes.BLENDED, 0.0f));
+
+	    appear.setTexture(texture); 
+	    
+		return appear;
+	}
+	
 	protected void getImages() {
 		File directory = new File(this.saveDirectory);
 
 		//BufferedImage img = null;
 		
 		images = new ArrayList<String>();
+		boolean noCamFound = false;
 		if( directory.exists() && directory.isDirectory())
 		{
 			//File[] files = directory.listFiles();
@@ -625,9 +852,23 @@ public class Case extends JFrame {
 			{
 				if(files[i].endsWith("jpg"))
 				{
-					images.add(this.saveDirectory + File.separator + files[i]);
+					if(files[i].equals("feilmedkamera.jpg"))
+					{
+						noCamImage = this.saveDirectory + File.separator + files[i];
+						noCamFound = true;
+					}
+					else
+					{
+						images.add(this.saveDirectory + File.separator + files[i]);
+					}
 				}
 			}
+		}
+		
+		if(!noCamFound)
+		{
+			System.out.println("feilmedkamera.jpg not found in image folder. Using a random image as feilmedkamera.jpg");
+			noCamImage = images.get((int)(Math.random()*images.size()));
 		}
 		
 		System.out.println("Total image count = " + images.size());
@@ -641,7 +882,7 @@ public class Case extends JFrame {
 		}
 		
 		String path = images.get(imagenum);
-		System.out.println("Path - getImage: " + path);
+		//System.out.println("Path - getImage: " + path);
 		try {
 			return ImageIO.read(new File(path));
 		} catch (IOException e) {
@@ -650,8 +891,224 @@ public class Case extends JFrame {
 		}
 	}
 	
+	public Image getNoCamImage()
+	{
+		System.out.println("Path - getNoCamImage: " + noCamImage);
+		try {
+			return ImageIO.read(new File(noCamImage));
+		} catch (IOException e) {
+			System.out.println("Path til ikke funnet: " + noCamImage);
+			return null;
+		}
+	}
+	
 	public Image getRandomImage()
 	{
 		return getImage((int)(Math.random()*images.size()));
 	}
+
+
+
+	
+	public void captureImage()
+	{
+		String savepath = this.saveDirectory + "\\cam"
+		+ this.getDateFormatNow("yyyyMMdd_HHmmss-S") + ".jpg";
+		System.out.println("Capturing current image to " +savepath);
+		
+		// Grab a frame
+		FrameGrabbingControl fgc = (FrameGrabbingControl) player
+				.getControl("javax.media.control.FrameGrabbingControl");
+		buf = fgc.grabFrame();
+		
+		// Convert it to an image
+		btoi = new BufferToImage((VideoFormat) buf.getFormat());
+		img = btoi.createImage(buf);
+		
+		if(img == null)
+		{
+			JOptionPane.showMessageDialog(null, "Feil med kamera. Fikk null img");
+		}
+		else
+		{
+			
+			// save image
+			saveJPG(img.getScaledInstance(265, 265, Image.SCALE_SMOOTH), savepath);
+			
+			// show the image
+			//imgpanel.setImage(img);
+			
+			//images.add(img);
+			images.add(savepath);
+			
+			if(images_lastadded.size() >= lastadded_max)
+			{
+				// Remove last
+				images_lastadded.remove(images_lastadded.size()-1);
+			}
+	
+			images_lastadded.add(0, images.size()-1);
+			images_nevershown .add(0, images.size()-1);
+		}
+	}
+	
+	public String getDateFormatNow(String dateFormat)
+	{
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+		return sdf.format(Calendar.getInstance().getTime());
+	}
+	
+	public static void saveJPG(Image img, String s) {
+		BufferedImage bi = new BufferedImage(
+				256, 
+				256, 
+				BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = bi.createGraphics();
+		g2.drawImage(img, null, null);
+		try {
+			ImageIO.write(bi,"jpg", new FileImageOutputStream(new File(s)));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		/*
+		FileOutputStream out = null;
+		try {
+			out = new FileOutputStream(s);
+		} catch (java.io.FileNotFoundException io) {
+			System.out.println("File Not Found");
+		}*/
+		/*
+		JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+		JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(bi);
+		param.setQuality(0.5f, false);
+		encoder.setJPEGEncodeParam(param);
+
+		try {
+			encoder.encode(bi);
+			out.close();
+		} catch (java.io.IOException io) {
+			System.out.println("IOException");
+		}*/
+	}
+	
+	public BufferedImage getCamImage ()
+	{
+		if(!cameraFound)
+		{
+			return (BufferedImage)getNoCamImage();
+		}
+		
+		// Grab a frame
+		FrameGrabbingControl fgc = (FrameGrabbingControl) player
+				.getControl("javax.media.control.FrameGrabbingControl");
+		buf = fgc.grabFrame();
+		
+		// Convert it to an image
+		btoi = new BufferToImage((VideoFormat) buf.getFormat());
+		img = btoi.createImage(buf);
+		
+		if(img == null)
+		{
+			System.out.println("Feil med henting av bilde fra kamera. img == null");
+			return (BufferedImage)getNoCamImage();
+		}
+		else
+		{
+			BufferedImage bi = new BufferedImage(
+					256, 
+					256, 
+					BufferedImage.TYPE_INT_RGB);
+			Graphics2D g2 = bi.createGraphics();
+			g2.drawImage(img, null, null);
+
+			return bi;
+			//return img.getScaledInstance(256, 256, Image.SCALE_FAST);
+		}
+	}
+	
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == 67) // C 
+		{
+			if(cameraFound)
+				this.captureImage();
+			else
+				JOptionPane.showMessageDialog(null, "Ingen kamera koblet til. Kan ikke hente bilde.");
+		}
+		
+		else if(e.getKeyCode() == 27) // Escape
+		{
+			System.out.println("Escape pressed, exiting");
+			System.exit(0);
+		}
+		
+		else {
+			displayInfo(e, "KEY TYPED: ");
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		
+	}
+	
+	private void displayInfo(KeyEvent e, String keyStatus) {
+		// Method copied from http://java.sun.com/docs/books/tutorial/uiswing/events/keylistener.html
+
+		//You should only rely on the key char if the event
+		//is a key typed event.
+		int id = e.getID();
+		String keyString;
+		if (id == KeyEvent.KEY_TYPED) {
+			char c = e.getKeyChar();
+			keyString = "key character = '" + c + "'";
+		} else {
+			int keyCode = e.getKeyCode();
+			keyString = "key code = " + keyCode + " ("
+					+ KeyEvent.getKeyText(keyCode) + ")";
+		}
+
+		int modifiersEx = e.getModifiersEx();
+		String modString = "extended modifiers = " + modifiersEx;
+		String tmpString = KeyEvent.getModifiersExText(modifiersEx);
+		if (tmpString.length() > 0) {
+			modString += " (" + tmpString + ")";
+		} else {
+			modString += " (no extended modifiers)";
+		}
+
+		String actionString = "action key? ";
+		if (e.isActionKey()) {
+			actionString += "YES";
+		} else {
+			actionString += "NO";
+		}
+
+		String locationString = "key location: ";
+		int location = e.getKeyLocation();
+		if (location == KeyEvent.KEY_LOCATION_STANDARD) {
+			locationString += "standard";
+		} else if (location == KeyEvent.KEY_LOCATION_LEFT) {
+			locationString += "left";
+		} else if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+			locationString += "right";
+		} else if (location == KeyEvent.KEY_LOCATION_NUMPAD) {
+			locationString += "numpad";
+		} else { // (location == KeyEvent.KEY_LOCATION_UNKNOWN)
+			locationString += "unknown";
+		}
+
+		// Added:
+		System.out.println("Keypress: " + keyString);
+	}
 }
+
