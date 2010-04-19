@@ -7,6 +7,8 @@ import javax.vecmath.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -25,8 +27,11 @@ import javax.media.j3d.*;
 import javax.media.util.BufferToImage;
 
 import com.sun.j3d.utils.picking.PickCanvas;
+import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
+import com.sun.j3d.utils.picking.behaviors.PickRotateBehavior;
 import com.sun.j3d.utils.universe.*;
+import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
 
@@ -45,7 +50,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
 */
 
-public class Case extends JFrame implements KeyListener {
+public class Case extends JFrame implements KeyListener, MouseListener {
 	public static void main(String[] s) {
 		
 		
@@ -168,8 +173,9 @@ public class Case extends JFrame implements KeyListener {
 		GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
 		Canvas3D cv = new Canvas3D(gc);
 		cv.addKeyListener(this);
+		cv.addMouseListener(this);
 		add(cv, BorderLayout.CENTER);
-		BranchGroup bg = createSceneGraph();
+		BranchGroup bg = createSceneGraph(cv);
 		bg.compile();
 		pc = new PickCanvas(cv, bg);
 	    pc.setMode(PickTool.GEOMETRY);
@@ -186,6 +192,9 @@ public class Case extends JFrame implements KeyListener {
 	    // JFrame stuff
 		setTitle("Caseoppgave - Datagrafikk ved UiS - Hallvard, Gunnstein og Stefan");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		
+
 		
 		//setUndecorated(true);
 		pack();
@@ -238,7 +247,7 @@ public class Case extends JFrame implements KeyListener {
 	public String noCamImage;
 	
 
-	private BranchGroup createSceneGraph() {
+	private BranchGroup createSceneGraph(Canvas3D cv) {
 		int n = 5;
 		
 		/* root */
@@ -253,6 +262,21 @@ public class Case extends JFrame implements KeyListener {
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
+
+		// rotere enkelte objekter
+	    /*testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+	    testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		MouseRotate rotator1 = new MouseRotate(testTransform);
+	    BoundingSphere bounds = new BoundingSphere();
+	    rotator1.setSchedulingBounds(bounds);
+	    testTransform.addChild(rotator1);
+		*/
+
+		PickRotateBehavior rotatorObjekt = new PickRotateBehavior(root, cv, bounds, 
+			      PickTool.GEOMETRY);
+		root.addChild(rotatorObjekt);
+		
+
 		
 		//Spin
 		root.addChild(testTransform);
@@ -301,12 +325,16 @@ public class Case extends JFrame implements KeyListener {
 		
 		// Webcam box
 		Shape3D webcamBox = new Shape3D();
+		TransformGroup wbTransform = new TransformGroup();
+		Transform3D webTr = new Transform3D();
+		webTr.setTranslation(new Vector3d(-0.5,0.5,0));
+		wbTransform.setTransform(webTr);
 		webcamBox = makeCamShape();
 		camBehave = new CamBehavior(webcamBox);
 		camBehave.setSchedulingBounds(bounds);
 		root.addChild(camBehave);
-		testTransform.addChild(webcamBox);
-		
+		wbTransform.addChild(webcamBox);
+		testTransform.addChild(wbTransform);
 		/*
 		SharedGroup sg = new SharedGroup();
 		// object
@@ -393,9 +421,12 @@ public class Case extends JFrame implements KeyListener {
 		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		
 		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
+		 PickTool.setCapabilities(shape, PickTool.INTERSECT_FULL);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+		shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
+		
 		shape.setAppearance(ap);
 		return shape;
 	}
@@ -686,7 +717,6 @@ public class Case extends JFrame implements KeyListener {
 		
 		TextureLoader loader = new TextureLoader(getRandomImage(), this);
 		ImageComponent2D image = loader.getImage();
-
 		
 		boolean cube = (image.getWidth() == image.getHeight());
 
@@ -939,6 +969,7 @@ public class Case extends JFrame implements KeyListener {
 	{
 		return getImage((int)(Math.random()*images.size()));
 	}
+
 	
 	public void captureImage()
 	{
@@ -1140,4 +1171,45 @@ public class Case extends JFrame implements KeyListener {
 		// Added:
 		System.out.println("Keypress: " + keyString);
 	}
-}
+
+	@Override
+	public void mouseClicked(java.awt.event.MouseEvent mouseEvent) {
+		System.out.println("Picking p�g�r:D");
+		pc.setShapeLocation(mouseEvent);
+		PickResult[] results = pc.pickAll();
+		for (int i = 0; (results != null) && (i < results.length); i++) {
+			Node node = results[i].getObject();
+			if (node instanceof Shape3D) {
+				((Shape3D) node).setAppearance(createAppearance(2));
+				System.out.println(node.toString());
+			}
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+	}
+	}
+
+
+
+
