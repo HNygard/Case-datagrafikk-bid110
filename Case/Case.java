@@ -790,6 +790,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		Shape3D shape;
 		TransformGroup shapeMove;
 		RotPosScalePathInterpolator rotPos;
+		boolean passed_zero = false;
 		
 		public CaseBehavior (Shape3D shape, TransformGroup shapeMove, RotPosScalePathInterpolator ting)
 		{
@@ -817,16 +818,25 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 			double avstand = Math.sqrt(location.getX()*location.getX() + location.getY()*location.getY());
 			if(avstand > (avstand_ytre-avstand_buffer))
 			{
-				int shapeType = (int)(Math.random()*2);
-				
-				// Get random geometry
-				shape.setGeometry(getGeometry(shapeType));
-				
-				// Get new appearance (new image/texture)
-				shape.setAppearance(createAppearance(shapeType));
-				
-				// Set new path
-				rotPos.setPathArrays(getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(), getRotPosScales());
+				if(passed_zero)
+				{
+					int shapeType = (int)(Math.random()*2);
+					
+					// Get random geometry
+					shape.setGeometry(getGeometry(shapeType));
+					
+					// Get new appearance (new image/texture)
+					shape.setAppearance(createAppearance(shapeType));
+					
+					// Set new path
+					rotPos.setPathArrays(getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(), getRotPosScales());
+					
+					passed_zero = false;
+				}
+			}
+			else if(!passed_zero)
+			{
+				passed_zero = true;
 			}
 			
 			// Time for testing purpose
