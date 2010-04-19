@@ -955,7 +955,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		}
 		
 		String path = images.get(imagenum);
-		System.out.println("Path - getImage: " + path);
+		//System.out.println("Path - getImage: " + path);
 		try {
 			return ImageIO.read(new File(path));
 		} catch (IOException e) {
