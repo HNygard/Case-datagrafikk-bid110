@@ -983,6 +983,11 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	
 	public void captureImage()
 	{
+		if(!cameraFound)
+		{
+			JOptionPane.showMessageDialog(null, "Ingen kamera koblet til. Kan ikke hente bilde.");
+			return;
+		}
 		String savepath = this.saveDirectory + "\\cam"
 		+ this.getDateFormatNow("yyyyMMdd_HHmmss-S") + ".jpg";
 		System.out.println("Capturing current image to " +savepath);
@@ -1105,10 +1110,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == 67) // C 
 		{
-			if(cameraFound)
-				this.captureImage();
-			else
-				JOptionPane.showMessageDialog(null, "Ingen kamera koblet til. Kan ikke hente bilde.");
+			this.captureImage();
 		}
 		
 		else if(e.getKeyCode() == 27) // Escape
