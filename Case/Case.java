@@ -27,6 +27,7 @@ import javax.media.util.BufferToImage;
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
+import com.sun.j3d.utils.picking.behaviors.PickRotateBehavior;
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.*;
@@ -171,7 +172,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		cv.addKeyListener(this);
 		cv.addMouseListener(this);
 		add(cv, BorderLayout.CENTER);
-		BranchGroup bg = createSceneGraph();
+		BranchGroup bg = createSceneGraph(cv);
 		bg.compile();
 		pc = new PickCanvas(cv, bg);
 	    pc.setMode(PickTool.GEOMETRY);
@@ -188,6 +189,9 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	    // JFrame stuff
 		setTitle("Caseoppgave - Datagrafikk ved UiS - Hallvard, Gunnstein og Stefan");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		
+
 		
 		//setUndecorated(true);
 		pack();
@@ -235,7 +239,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	public String noCamImage;
 	
 
-	private BranchGroup createSceneGraph() {
+	private BranchGroup createSceneGraph(Canvas3D cv) {
 		int n = 5;
 		
 		/* root */
@@ -248,6 +252,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
+<<<<<<< HEAD
 		// rotere enkelte objekter
 	    /*testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 	    testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
@@ -256,6 +261,12 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	    rotator1.setSchedulingBounds(bounds);
 	    testTransform.addChild(rotator1);
 		*/
+=======
+		PickRotateBehavior rotatorObjekt = new PickRotateBehavior(root, cv, bounds, 
+			      PickTool.GEOMETRY);
+		root.addChild(rotatorObjekt);
+		
+>>>>>>> gokland/master
 		
 		//Spin
 		root.addChild(testTransform);
@@ -394,9 +405,12 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		
 		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
+		 PickTool.setCapabilities(shape, PickTool.INTERSECT_FULL);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+		shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
+		
 		shape.setAppearance(ap);
 		return shape;
 	}
@@ -905,6 +919,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	{
 		return getImage((int)(Math.random()*images.size()));
 	}
+<<<<<<< HEAD
 	
 	public void captureImage()
 	{
@@ -1137,3 +1152,6 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		
 	}
 }
+=======
+}
+>>>>>>> gokland/master
