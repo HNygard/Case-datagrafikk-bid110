@@ -246,6 +246,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	public boolean cameraFound;
 	public String noCamImage;
 	
+	Shape3D webcamBox;
 
 	private BranchGroup createSceneGraph(Canvas3D cv) {
 		int n = 5;
@@ -324,7 +325,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		}
 		
 		// Webcam box
-		Shape3D webcamBox = new Shape3D();
+		webcamBox = new Shape3D();
 		TransformGroup wbTransform = new TransformGroup();
 		Transform3D webTr = new Transform3D();
 		webTr.setTranslation(new Vector3d(-0.5,0.5,0));
@@ -1186,7 +1187,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 
 	@Override
 	public void mouseClicked(java.awt.event.MouseEvent mouseEvent) {
-		System.out.println("Picking p�g�r:D");
+		System.out.println("Picking:D");
 		pc.setShapeLocation(mouseEvent);
 		PickResult[] results = pc.pickAll();
 		for (int i = 0; (results != null) && (i < results.length); i++) {
@@ -1194,6 +1195,9 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 			if (node instanceof Shape3D) {
 				((Shape3D) node).setAppearance(createAppearance(2));
 				System.out.println(node.toString());
+				if(node == webcamBox){
+					captureImage();
+				}
 			}
 		}
 	}
