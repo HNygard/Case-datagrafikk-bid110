@@ -581,6 +581,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 			indices[21] = 2;
 			indices[22] = 6;
 			indices[23] = 5;
+			
 		}
 		//else if (shapeType == 1)
 		else
@@ -723,9 +724,13 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 
 	    TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
 		TexCoordGeneration.TEXTURE_COORDINATE_3);
-		tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
+	    
+		tcg.setPlaneR(new Vector4f(2, 0, 0, 0)); 
 		tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
 		tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
+		//tcg.setPlaneQ(new Vector4f(0, 0, 0, 0));
+		
+	
 		appear.setTexCoordGeneration(tcg);
 		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
 		
@@ -752,12 +757,14 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 			// definerer bilde for hver av sidene for firkant
 			else if(cube && shapeType == 0)
 			{
+				
 						    texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
 						    texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
 						    texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
 						    texture.setImage(0, TextureCubeMap.POSITIVE_X, image);
 						    texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
 						    texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);   
+						    
 			}
 			else
 			{
@@ -887,21 +894,22 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		TextureLoader loader = new TextureLoader(getCamImage(), this);
 		ImageComponent2D image = loader.getImage();
 		
-
+		
 	    TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
-		TexCoordGeneration.TEXTURE_COORDINATE_3);
+	   	TexCoordGeneration.TEXTURE_COORDINATE_3);
 		tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
 		tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
 		tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
 		appear.setTexCoordGeneration(tcg);
+		
 		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
 		
 		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
 		image.getWidth(), image.getHeight());
 		texture.setImage(0, image);
-		tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
+		//tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
 		appear.setMaterial(material);
-		appear.setTexCoordGeneration(tcg);
+		//appear.setTexCoordGeneration(tcg);
 		appear.setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
 
@@ -1195,7 +1203,13 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 
 	@Override
 	public void mouseClicked(java.awt.event.MouseEvent mouseEvent) {
+
 		System.out.println("Picking:D");
+
+		System.out.println("Picking:D");
+
+		System.out.println("Picking p�g�r:D");
+
 		pc.setShapeLocation(mouseEvent);
 		PickResult[] results = pc.pickAll();
 		for (int i = 0; (results != null) && (i < results.length); i++) {
