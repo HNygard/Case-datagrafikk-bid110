@@ -549,82 +549,18 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	*/
 	public Appearance createAppearance(int shapeType) {
 		Appearance appear = new Appearance();
-		/*
-		URL filename;
-		if(Math.random() > 0.5)
-			filename = getClass().getClassLoader().getResource(
-			"images/earth.jpg");
-		else
-			filename = getClass().getClassLoader().getResource(
-				"images/stone.jpg");*/
-
 		TextureLoader loader = new TextureLoader(getRandomImage(), this);
 		ImageComponent2D image = loader.getImage();
-
-		boolean cube = (image.getWidth() == image.getHeight());
-
-		TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.EYE_LINEAR, 
-				TexCoordGeneration.TEXTURE_COORDINATE_3);
-		tcg.setPlaneR(new Vector4f(3, 0, 0, 0));
-		tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
-		tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
-		appear.setTexCoordGeneration(tcg);
-		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
-
-		boolean strekk = false;
-		if(cube)
-		{
-			TextureCubeMap texture = new TextureCubeMap(Texture.BASE_LEVEL, Texture.RGBA,
-					image.getWidth());
-			texture.setEnable(true);
-			texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-			texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
-			appear.setTexture(texture);
-
-			// definerer bilde for hver av sidene for Dodecahedron
-			if(shapeType == 1)
-			{
-				texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
-				texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
-				texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
-				texture.setImage(0, TextureCubeMap.POSITIVE_X, image);
-				texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
-				texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);
-			}			  
-			// definerer bilde for hver av sidene for firkant
-			else if(cube && shapeType == 0)
-			{
-				texture.setImage(0, TextureCubeMap.NEGATIVE_X, image);
-				texture.setImage(0, TextureCubeMap.NEGATIVE_Y, image);
-				texture.setImage(0, TextureCubeMap.NEGATIVE_Z, image);
-				texture.setImage(0, TextureCubeMap.POSITIVE_X, image);
-				texture.setImage(0, TextureCubeMap.POSITIVE_Y, image);
-				texture.setImage(0, TextureCubeMap.POSITIVE_Z, image);   
-			}
-			else
-			{
-				strekk = true;
-			}
+		if(image ==null){
+			System.out.println("Finner ikke bilde.");
 		}
-		// strekker bilde 
-		else
-		{
-			strekk = true;
-		}
-
-		if(strekk)
-		{
-			Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
-					image.getWidth(), image.getHeight());
-			texture.setImage(0, image);
-			tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
-			appear.setMaterial(material);
-			appear.setTexCoordGeneration(tcg);
-			appear.setTransparencyAttributes(new TransparencyAttributes(
-					TransparencyAttributes.BLENDED, 0.0f));
-
-			appear.setTexture(texture);
-		}
+		Texture2D texture = new Texture2D(Texture.BASE_LEVEL,Texture.RGBA,
+				image.getWidth(),image.getHeight());
+		texture.setImage(0, image);
+		texture.setEnable(true);
+		texture.setMagFilter(texture.BASE_LEVEL_LINEAR);
+		texture.setMinFilter(texture.BASE_LEVEL_LINEAR);
+		appear.setTexture(texture);
 		return appear;
 	}
 	
@@ -765,36 +701,24 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	
 	public Appearance createCamAppearance() {
 		Appearance appear = new Appearance();
-		/*
-		URL filename;
-		if(Math.random() > 0.5)
-			filename = getClass().getClassLoader().getResource(
-			"images/earth.jpg");
-		else
-			filename = getClass().getClassLoader().getResource(
-				"images/stone.jpg");*/
-
+		
 		TextureLoader loader = new TextureLoader(getCamImage(), this);
 		ImageComponent2D image = loader.getImage();
 
 
-		TexCoordGeneration tcg = new TexCoordGeneration(TexCoordGeneration.OBJECT_LINEAR, 
-				TexCoordGeneration.TEXTURE_COORDINATE_3);
-		tcg.setPlaneR(new Vector4f(2, 0, 0, 0));
-		tcg.setPlaneS(new Vector4f(0, 2, 0, 0));
-		tcg.setPlaneT(new Vector4f(0, 0, 2, 0));
-		appear.setTexCoordGeneration(tcg);
-		appear.setCapability(Appearance.ALLOW_TEXGEN_WRITE);
+		
 
 		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
 				image.getWidth(), image.getHeight());
 		texture.setImage(0, image);
-		tcg.setGenMode(TexCoordGeneration.OBJECT_LINEAR);
+		texture.setEnable(true);
+		texture.setMagFilter(texture.BASE_LEVEL_LINEAR);
+		texture.setMinFilter(texture.BASE_LEVEL_LINEAR);
+		/*
 		appear.setMaterial(material);
-		appear.setTexCoordGeneration(tcg);
 		appear.setTransparencyAttributes(new TransparencyAttributes(
 				TransparencyAttributes.BLENDED, 0.0f));
-
+		*/
 		appear.setTexture(texture); 
 
 		return appear;
