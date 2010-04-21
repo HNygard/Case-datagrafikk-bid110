@@ -334,7 +334,6 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		wbTransform.setTransform(webTr);
 
 		webcamBox = makeCamShape();
-		root.addChild(camBehave);
 
 		TransformGroup rotatorCam = new TransformGroup();
 		rotatorCam.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -343,6 +342,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		
 		camBehave = new CamBehavior(webcamBox, rotatorCam);
 		camBehave.setSchedulingBounds(bounds);
+		root.addChild(camBehave);
 		
 		testTransform.addChild(wbTransform);
 		
