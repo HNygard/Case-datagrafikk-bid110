@@ -148,23 +148,23 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 				*/
 				
 				player.start();
+				
+				if ((comp = player.getVisualComponent()) != null) {
+					add(comp, BorderLayout.EAST);
+				}
 			}
 			catch(javax.media.NoPlayerException e) 
 			{
 				 JOptionPane.showMessageDialog(null, "Klarer ikke å starte"+
 						 " kamera. Sjekk at det er koblet til.", 
 						 "IOException", 
-						 JOptionPane.ERROR_MESSAGE); 
-				 System.exit(0);
+						 JOptionPane.ERROR_MESSAGE);
+				 cameraFound = false;
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				System.exit(0);
-			}
-			
-			if ((comp = player.getVisualComponent()) != null) {
-				add(comp, BorderLayout.EAST);
+				cameraFound = false;
 			}
 		}
 		
