@@ -218,7 +218,6 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	Appearance[]      appearance;
 	Material          material;
 	BoundingSphere    bounds;
-	BoundingSphere    smallbounds;
 	CaseBehavior[]    behave;
 	CamBehavior	      camBehave;
 	
@@ -254,8 +253,6 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		/* root */
 		BranchGroup root = new BranchGroup();
 		bounds = new BoundingSphere();
-		smallbounds = new BoundingSphere();
-		smallbounds.setRadius(avstand_ytre);
 		
 		/* testTransform */
 		Transform3D tr = new Transform3D();
