@@ -213,7 +213,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	PickCanvas        pc;
 
 	TransformGroup[]  shapeMove;
-	Shape3D[]         shapes;
+	Primitive[]         shapes;
 	RotPosScalePathInterpolator[] rotPosScale;
 	Appearance[]      appearance;
 	Material          material;
@@ -246,7 +246,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	public boolean cameraFound;
 	public String noCamImage;
 
-	Shape3D webcamBox;
+	Primitive webcamBox;
 
 	private BranchGroup createSceneGraph(Canvas3D cv) {
 		int n = 5;
@@ -312,7 +312,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 
 		// Make arrays
 		shapeMove   = new TransformGroup[n];
-		shapes      = new Shape3D[n];
+		shapes      = new Primitive[n];
 		rotPosScale = new RotPosScalePathInterpolator[n];
 		appearance  = new Appearance[n];
 		behave      = new CaseBehavior[n];
@@ -325,17 +325,18 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		}
 
 		// Webcam box
-		webcamBox = new Shape3D();
 		TransformGroup wbTransform = new TransformGroup();
 		Transform3D webTr = new Transform3D();
 		webTr.setTranslation(new Vector3d(-0.5,0.5,0));
 		wbTransform.setTransform(webTr);
+
 		webcamBox = makeCamShape();
 		camBehave = new CamBehavior(webcamBox);
 		camBehave.setSchedulingBounds(bounds);
 		root.addChild(camBehave);
 		wbTransform.addChild(webcamBox);
 		testTransform.addChild(wbTransform);
+		System.out.println("Webcam box laget!");
 		/*
 		SharedGroup sg = new SharedGroup();
 		// object
@@ -388,7 +389,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	{
 		// Oppretter shape
 		shapes[i] = makeShape();
-
+		
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
 		shapeMove[i].addChild(shapes[i]);
@@ -404,24 +405,23 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 
 	}
 
-	public Shape3D makeShape ()
+	public Primitive makeShape ()
 	{
 		int shapeType = (int)(Math.random()*2);
 		Appearance ap = createAppearance(shapeType);
-		/*
-		return new Box(
-				(float) (0.05f * Math.random()),
-				(float) (0.05f * Math.random()),
-				(float) (0.05f * Math.random()),
-					Primitive.ENABLE_GEOMETRY_PICKING |
-					Primitive.ENABLE_APPEARANCE_MODIFY |
-					Primitive.GENERATE_NORMALS |
-					Primitive.GENERATE_TEXTURE_COORDS,ap);
-					   Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
-		 */
-		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
+		Primitive shape = new Box(
+				(float) (0.4),
+				(float) (0.4),
+				(float) (0.4),
+				Primitive.ENABLE_GEOMETRY_PICKING |
+				Primitive.ENABLE_APPEARANCE_MODIFY |
+				Primitive.GENERATE_NORMALS |
+				Primitive.GENERATE_TEXTURE_COORDS,ap);
 
-		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
+		//Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
+
+		/*
+		Primitive shape = new Primitive(getGeometry(shapeType), ap);
 		PickTool.setCapabilities(shape, PickTool.INTERSECT_FULL);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
@@ -429,31 +429,28 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
 
 		shape.setAppearance(ap);
+		 */
 		return shape;
 	}
 
-	public Shape3D makeCamShape ()
+	public Primitive makeCamShape ()
 	{
-		int shapeType = 0;
 		Appearance ap = createCamAppearance();
-		/*
-		return new Box(
-				(float) (0.05f * Math.random()),
-				(float) (0.05f * Math.random()),
-				(float) (0.05f * Math.random()),
+		Primitive shape = new Box(
+				(float) (0.2),
+				(float) (0.2),
+				(float) (0.2),
 					Primitive.ENABLE_GEOMETRY_PICKING |
 					Primitive.ENABLE_APPEARANCE_MODIFY |
 					Primitive.GENERATE_NORMALS |
 					Primitive.GENERATE_TEXTURE_COORDS,ap);
-					   Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
-		 */
-		//PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
-
-		Shape3D shape = new Shape3D(getGeometry(shapeType), ap);
+		/* 
+		PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
 		shape.setAppearance(ap);
+		*/
 		return shape;
 	}
 
@@ -526,185 +523,16 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		return rotPosScalePath;
 	}
 
-	public GeometryArray getGeometry(int shapeType)
+	/*public void getGeometry(int shapeType)
 	{
-
-		GeometryInfo gi;
-		Point3d[] pts;
-		int[] indices;
-
-		double scale;
-
-		if (shapeType == 0) {
-
-			double l = Math.random() * 0.4;
-			double w = Math.random() * 0.4;
-			// w = 0.04;
-			double h = Math.random() * 0.4;
-			// h=0.01;
-			gi = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
-			pts = new Point3d[8];
-			pts[0] = new Point3d(0.5f, 0.5f, 0.5f);
-			pts[1] = new Point3d(0.5f, -0.5f, 0.5f);
-			pts[2] = new Point3d(-0.5f, -0.5f, 0.5f);
-			pts[3] = new Point3d(-0.5f, 0.5f, 0.5f);
-			pts[4] = new Point3d(0.5f, 0.5f, -0.5f);
-			pts[5] = new Point3d(0.5f, -0.5f, -0.5f);
-			pts[6] = new Point3d(-0.5f, -0.5f, -0.5f);
-			pts[7] = new Point3d(-0.5f, 0.5f, -0.5f);
-
-			scale = 0.5;
-
-			gi.setCoordinates(pts);
-			indices = new int[24];
-			indices[0] = 0;
-			indices[1] = 3;
-			indices[2] = 2;
-			indices[3] = 1;
-			indices[4] = 0;
-			indices[5] = 1;
-			indices[6] = 5;
-			indices[7] = 4;
-			indices[8] = 4;
-			indices[9] = 5;
-			indices[10] = 6;
-			indices[11] = 7;
-			indices[12] = 2;
-			indices[13] = 3;
-			indices[14] = 7;
-			indices[15] = 6;
-			indices[16] = 0;
-			indices[17] = 4;
-			indices[18] = 7;
-			indices[19] = 3;
-			indices[20] = 1;
-			indices[21] = 2;
-			indices[22] = 6;
-			indices[23] = 5;
+		if (shapeType ==0){
+			newBox();
 		}
-		//else if (shapeType == 1)
-		else
-		{
-			gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
-			double phi = 0.5 * (Math.sqrt(5) + 1);
-			pts = new Point3d[20];
-			pts[0] = new Point3d(1, 1, 1);
-			pts[1] = new Point3d(0, 1 / phi, phi);
-			pts[2] = new Point3d(phi, 0, 1 / phi);
-			pts[3] = new Point3d(1 / phi, phi, 0);
-			pts[4] = new Point3d(-1, 1, 1);
-			pts[5] = new Point3d(0, -1 / phi, phi);
-			pts[6] = new Point3d(1, -1, 1);
-			pts[7] = new Point3d(phi, 0, -1 / phi);
-			pts[8] = new Point3d(1, 1, -1);
-			pts[9] = new Point3d(-1 / phi, phi, 0);
-			pts[10] = new Point3d(-phi, 0, 1 / phi);
-			pts[11] = new Point3d(-1, -1, 1);
-			pts[12] = new Point3d(1 / phi, -phi, 0);
-			pts[13] = new Point3d(1, -1, -1);
-			pts[14] = new Point3d(0, 1 / phi, -phi);
-			pts[15] = new Point3d(-1, 1, -1);
-			pts[16] = new Point3d(-1 / phi, -phi, 0);
-			pts[17] = new Point3d(-phi, 0, -1 / phi);
-			pts[18] = new Point3d(0, -1 / phi, -phi);
-			pts[19] = new Point3d(-1, -1, -1);
-
-			scale = 0.2;
-
-			int i = 0;
-			indices = new int[60];
-			indices[i] = 0;			i++;
-			indices[i] = 1;			i++;
-			indices[i] = 5;			i++;
-			indices[i] = 6;			i++;
-			indices[i] = 2;			i++;
-
-			indices[i] = 0;			i++;
-			indices[i] = 2;			i++;
-			indices[i] = 7;			i++;
-			indices[i] = 8;			i++;
-			indices[i] = 3;			i++;
-			// 10
-			indices[i] = 0;			i++;
-			indices[i] = 3;			i++;
-			indices[i] = 9;			i++;
-			indices[i] = 4;			i++;
-			indices[i] = 1;			i++;
-
-			indices[i] = 1;			i++;
-			indices[i] = 4;			i++;
-			indices[i] = 10;		i++;
-			indices[i] = 11;		i++;
-			indices[i] = 5;			i++;
-			// 20
-			indices[i] = 2;			i++;
-			indices[i] = 6;			i++;
-			indices[i] = 12;		i++;
-			indices[i] = 13;		i++;
-			indices[i] = 7;			i++;
-
-			indices[i] = 3;			i++;
-			indices[i] = 8;			i++;
-			indices[i] = 14;		i++;
-			indices[i] = 15;		i++;
-			indices[i] = 9;			i++;
-			// 30
-			indices[i] = 5;			i++;
-			indices[i] = 11;		i++;
-			indices[i] = 16;		i++;
-			indices[i] = 12;		i++;
-			indices[i] = 6;			i++;
-
-			indices[i] = 7;			i++;
-			indices[i] = 13;		i++;
-			indices[i] = 18;		i++;
-			indices[i] = 14;		i++;
-			indices[i] = 8;			i++;
-			// 40
-			indices[i] = 9;			i++;
-			indices[i] = 15;		i++;
-			indices[i] = 17;		i++;
-			indices[i] = 10;		i++;
-			indices[i] = 4;			i++;
-
-			indices[i] = 19;		i++;
-			indices[i] = 16;		i++;
-			indices[i] = 11;		i++;
-			indices[i] = 10;		i++;
-			indices[i] = 17;		i++;
-			// 50
-			indices[i] = 19;		i++;
-			indices[i] = 17;		i++;
-			indices[i] = 15;		i++;
-			indices[i] = 14;		i++;
-			indices[i] = 18;		i++;
-
-			indices[i] = 19;		i++;
-			indices[i] = 18;		i++;
-			indices[i] = 13;		i++;
-			indices[i] = 12;		i++;
-			indices[i] = 16;		i++;
-			// 60
-			int[] stripCounts = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };
-			gi.setStripCounts(stripCounts);
+		else {
+			newSphere();
 		}
-
-		// Fix scale
-		double a, b, c;
-		for (int i = 0; i < pts.length; i++) {
-			a = pts[i].getX() * scale;
-			b = pts[i].getY() * scale;
-			c = pts[i].getZ() * scale;
-			pts[i] = new Point3d(a, b, c);
-		}
-
-		gi.setCoordinates(pts);
-		gi.setCoordinateIndices(indices);
-		NormalGenerator ng = new NormalGenerator();
-		ng.generateNormals(gi);
-		return gi.getGeometryArray();
 	}
-
+	*/
 	public Appearance createAppearance(int shapeType) {
 		Appearance appear = new Appearance();
 		/*
@@ -788,12 +616,12 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 
 	public class CaseBehavior extends Behavior 
 	{
-		Shape3D shape;
+		Primitive shape;
 		TransformGroup shapeMove;
 		RotPosScalePathInterpolator rotPos;
 		boolean passed_zero = false;
 
-		public CaseBehavior (Shape3D shape, TransformGroup shapeMove, RotPosScalePathInterpolator ting)
+		public CaseBehavior (Primitive shape, TransformGroup shapeMove, RotPosScalePathInterpolator ting)
 		{
 			this.shape = shape;
 			this.shapeMove = shapeMove;
@@ -824,7 +652,8 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 					int shapeType = (int)(Math.random()*2);
 
 					// Get random geometry
-					shape.setGeometry(getGeometry(shapeType));
+					//TODO: Må fikses
+					//shape.setGeometry(getGeometry(shapeType));
 
 					// Get new appearance (new image/texture)
 					shape.setAppearance(createAppearance(shapeType));
@@ -848,9 +677,9 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 
 	public class CamBehavior extends Behavior 
 	{
-		Shape3D shape;
+		Primitive shape;
 
-		public CamBehavior (Shape3D shape)
+		public CamBehavior (Primitive shape)
 		{
 			this.shape = shape;
 		}
@@ -1192,9 +1021,9 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		PickResult[] results = pc.pickAll();
 		for (int i = 0; (results != null) && (i < results.length); i++) {
 			Node node = results[i].getObject();
-			if (node instanceof Shape3D) {
-				((Shape3D) node).setAppearance(createAppearance(2));
-				System.out.println(node.toString());
+			System.out.println(node.toString());
+			if (node instanceof Primitive) {
+				((Primitive) node).setAppearance(createAppearance(2));
 				if(node == webcamBox){
 					captureImage();
 				}
@@ -1224,6 +1053,17 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 	}
+	/*
+	public Box newBox() {
+		Box eske = new Box(2.0,2.0,2.0,ap);
+		return eske;
+		
+	}
+	public Sphere newSphere() {
+		Sphere kule = new Sphere(2.0,ap);
+		return kule;
+	}
+	*/
 }
 
 
