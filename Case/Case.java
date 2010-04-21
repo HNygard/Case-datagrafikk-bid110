@@ -2,6 +2,8 @@ package Case;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.vecmath.*;
 
 import java.awt.*;
@@ -9,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -50,7 +53,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
 */
 
-public class Case extends JFrame implements KeyListener, MouseListener {
+public class Case extends JFrame implements KeyListener, MouseListener, MouseMotionListener {
 	public static void main(String[] s) {
 		
 		
@@ -174,6 +177,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		Canvas3D cv = new Canvas3D(gc);
 		cv.addKeyListener(this);
 		cv.addMouseListener(this);
+		cv.addMouseMotionListener(this);
 		add(cv, BorderLayout.CENTER);
 		BranchGroup bg = createSceneGraph(cv);
 		bg.compile();
@@ -219,6 +223,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	Material          material;
 	BoundingSphere    bounds;
 	CaseBehavior[]    behave;
+	ArrayList<rotationBehave> behaveRotating;
 	CamBehavior	      camBehave;
 	
 	// Images
@@ -313,6 +318,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		rotPosScale = new RotPosScalePathInterpolator[n];
 		appearance  = new Appearance[n];
 		behave      = new CaseBehavior[n];
+		behaveRotating = new ArrayList<rotationBehave>();
 		
 		// Make shapes
 		for (int i = 0; i < n; i++) {
@@ -783,9 +789,8 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		return appear;
 	}
 	
-	public class CaseBehavior extends Behavior 
+	public class CaseBehavior extends rotationBehave
 	{
-		Shape3D shape;
 		TransformGroup shapeMove;
 		RotPosScalePathInterpolator rotPos;
 		boolean passed_zero = false;
@@ -840,13 +845,10 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 			// Time for testing purpose
 			wakeupOn(new WakeupOnElapsedTime(50));
 		}
-		
 	}
 	
-	public class CamBehavior extends Behavior 
+	public class CamBehavior extends rotationBehave
 	{
-		Shape3D shape;
-		
 		public CamBehavior (Shape3D shape)
 		{
 			this.shape = shape;
@@ -866,6 +868,41 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 			
 			// Time for testing purpose
 			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+		
+	}
+	
+	public abstract class rotationBehave extends Behavior
+	{
+		Shape3D shape;
+		Point mouseStart;
+		Point mouseLast;
+		
+		public void rotateStart(Point mouse)
+		{
+			//System.out.println("rotateStart: " + shape.toString());
+			this.mouseStart = this.mouseLast = mouse;
+			behaveRotating.add(this);
+		}
+		
+		public void rotate(Point mouse)
+		{
+			//System.out.println("rotate: " + shape.toString());
+			if(mouseStart != null)
+			{
+				if(!mouseLast.equals(mouse))
+				{
+					mouseLast = mouse;
+					System.out.println("Distance: " + (mouse.distance(mouseStart)));
+				}
+			}
+		}
+		
+		public void rotateStop()
+		{
+			//System.out.println("rotateStop: " + shape.toString());
+			behaveRotating.remove(this);
+			mouseStart = null;
 		}
 		
 	}
@@ -1190,8 +1227,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		for (int i = 0; (results != null) && (i < results.length); i++) {
 			Node node = results[i].getObject();
 			if (node instanceof Shape3D) {
-				((Shape3D) node).setAppearance(createAppearance(2));
-				System.out.println(node.toString());
+				System.out.println("clicked: " + node.toString());
 				if(node == webcamBox){
 					captureImage();
 				}
@@ -1212,17 +1248,66 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 	}
 
 	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	public void mousePressed(MouseEvent arg0)
+	{
+		// Most likely one of the moving objects
+
+		pc.setShapeLocation(arg0);
+		PickResult[] results = pc.pickAll();
+		for (int i = 0; (results != null) && (i < results.length); i++) {
+			Node node = results[i].getObject();
+			if (node instanceof Shape3D)
+			{
+				System.out.println("pressed: " + node.toString());
+				if(node != webcamBox){
+					for (int j = 0; j < shapes.length; j++)
+					{
+						if(node == shapes[j])
+						{
+							// Start rotation in this point
+							behave[j].rotateStart(arg0.getPoint());
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
+		// Stop all rotation
+		if(behaveRotating.size() > 0)
+		{
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					for (rotationBehave behavior : behaveRotating) {
+						behavior.rotateStop();
+					}
+				}
+			});
+		}
 	}
+
+	@Override
+	public void mouseDragged(final MouseEvent e) {
+		if(behaveRotating.size() > 0)
+		{
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					for (rotationBehave behavior : behaveRotating) {
+						behavior.rotate(e.getPoint());
+					}
+				}
+			});
+		}
+		
 	}
 
-
-
-
+	@Override
+	public void mouseMoved(MouseEvent e) {
+	}
+}
