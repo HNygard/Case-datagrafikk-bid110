@@ -334,12 +334,18 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		wbTransform.setTransform(webTr);
 
 		webcamBox = makeCamShape();
-		camBehave = new CamBehavior(webcamBox);
-		camBehave.setSchedulingBounds(bounds);
 		root.addChild(camBehave);
-		wbTransform.addChild(webcamBox);
+
+		TransformGroup rotatorCam = new TransformGroup();
+		rotatorCam.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		rotatorCam.addChild(webcamBox);
+		wbTransform.addChild(rotatorCam);
+		
+		camBehave = new CamBehavior(webcamBox, rotatorCam);
+		camBehave.setSchedulingBounds(bounds);
+		
 		testTransform.addChild(wbTransform);
-		System.out.println("Webcam box laget!");
+		
 		/*
 		SharedGroup sg = new SharedGroup();
 		// object
@@ -393,9 +399,14 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		// Oppretter shape
 		shapes[i] = makeShape();
 		
+		// Oppretter rotator
+		TransformGroup rotator = new TransformGroup();
+		rotator.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		rotator.addChild(shapes[i]);
+		
 		// Oppretter shapeMove
 		shapeMove[i] = new TransformGroup();
-		shapeMove[i].addChild(shapes[i]);
+		shapeMove[i].addChild(rotator);
 		shapeMove[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
 		// Oppretter RotPosScaleIntepolator
@@ -403,7 +414,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		shapeMove[i].addChild(rotPosScale[i]);
 
 		// Oppretter Behavior
-		behave[i] = new CaseBehavior(shapes[i], shapeMove[i], rotPosScale[i]);
+		behave[i] = new CaseBehavior(shapes[i], shapeMove[i], rotPosScale[i], rotator);
 		behave[i].setSchedulingBounds(bounds);
 
 	}
@@ -623,11 +634,12 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		RotPosScalePathInterpolator rotPos;
 		boolean passed_zero = false;
 
-		public CaseBehavior (Primitive shape, TransformGroup shapeMove, RotPosScalePathInterpolator ting)
+		public CaseBehavior (Primitive shape, TransformGroup shapeMove, RotPosScalePathInterpolator ting, TransformGroup rotator)
 		{
 			this.shape = shape;
 			this.shapeMove = shapeMove;
 			this.rotPos = ting;
+			this.rotator = rotator;
 		}
 
 		@Override
@@ -654,7 +666,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 					int shapeType = (int)(Math.random()*2);
 
 					// Get random geometry
-					//TODO: M� fikses
+					//TODO: Må fikses
 					//shape.setGeometry(getGeometry(shapeType));
 
 					// Get new appearance (new image/texture)
@@ -678,9 +690,10 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	
 	public class CamBehavior extends rotationBehave
 	{
-		public CamBehavior (Primitive shape)
+		public CamBehavior (Primitive shape, TransformGroup rotator)
 		{
 			this.shape = shape;
+			this.rotator = rotator;
 		}
 
 		@Override
@@ -706,6 +719,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		Primitive shape;
 		Point mouseStart;
 		Point mouseLast;
+		TransformGroup rotator;
 		
 		public void rotateStart(Point mouse)
 		{
@@ -722,7 +736,20 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 				if(!mouseLast.equals(mouse))
 				{
 					mouseLast = mouse;
-					System.out.println("Distance: " + (mouse.distance(mouseStart)));
+					double distanceX = mouse.getX() - mouseStart.getX();
+					double distanceY = mouse.getY() - mouseStart.getY();
+					
+					Transform3D rotY = new Transform3D();
+					rotY.rotY(0.03*distanceX);
+					
+					Transform3D transform = new Transform3D();
+					transform.rotX(0.03*distanceY);
+					transform.mul(rotY);
+					rotator.setTransform(transform);
+					
+					//System.out.println("Distance: " + (mouse.distance(mouseStart)) +
+					//		", distanceX: " + distanceX +
+					//		", distanceY: " + distanceY);
 				}
 			}
 		}
@@ -1084,10 +1111,9 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		pc.setShapeLocation(arg0);
 		PickResult[] results = pc.pickAll();
 		for (int i = 0; (results != null) && (i < results.length); i++) {
-			Node node = results[i].getObject();
-			if (node instanceof Shape3D)
+			Node node = results[i].getObject().getParent();
+			if (node instanceof Primitive)
 			{
-				System.out.println("pressed: " + node.toString());
 				if(node != webcamBox){
 					for (int j = 0; j < shapes.length; j++)
 					{
@@ -1097,6 +1123,9 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 							behave[j].rotateStart(arg0.getPoint());
 						}
 					}
+				} else
+				{
+					camBehave.rotateStart(arg0.getPoint());
 				}
 			}
 		}
@@ -1107,31 +1136,19 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		// Stop all rotation
 		if(behaveRotating.size() > 0)
 		{
-			SwingUtilities.invokeLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					for (rotationBehave behavior : behaveRotating) {
-						behavior.rotateStop();
-					}
-				}
-			});
+			for (int i = 0; i < behaveRotating.size(); i++) {
+				behaveRotating.get(i).rotateStop();
+			}
 		}
 	}
 
 	@Override
-	public void mouseDragged(final MouseEvent e) {
+	public void mouseDragged(MouseEvent e) {
 		if(behaveRotating.size() > 0)
 		{
-			SwingUtilities.invokeLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					for (rotationBehave behavior : behaveRotating) {
-						behavior.rotate(e.getPoint());
-					}
-				}
-			});
+			for (int i = 0; i < behaveRotating.size(); i++) {
+				behaveRotating.get(i).rotate(e.getPoint());
+			}
 		}
 		
 	}
