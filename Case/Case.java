@@ -458,13 +458,11 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 					Primitive.ENABLE_APPEARANCE_MODIFY |
 					Primitive.GENERATE_NORMALS |
 					Primitive.GENERATE_TEXTURE_COORDS,ap);
-		/* 
-		PickTool.setCapabilities(shapes[i], PickTool.INTERSECT_TEST);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-		shape.setAppearance(ap);
-		*/
+		
+		
 		return shape;
 	}
 
