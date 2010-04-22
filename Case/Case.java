@@ -220,8 +220,9 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	PickCanvas        pc;
 
 	TransformGroup[]  shapeMove;
-	Primitive[]         shapes;
+	Primitive[]       shapes;
 	RotPosScalePathInterpolator[] rotPosScale;
+	Double[]          angles;
 	Appearance[]      appearance;
 	Material          material;
 	BoundingSphere    bounds;
@@ -314,6 +315,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		shapeMove   = new TransformGroup[n];
 		shapes      = new Primitive[n];
 		rotPosScale = new RotPosScalePathInterpolator[n];
+		angles      = new Double[n];
 		appearance  = new Appearance[n];
 		behave      = new CaseBehavior[n];
 		behaveRotating = new ArrayList<rotationBehave>();
@@ -364,11 +366,12 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		shapeMove[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
 		// Oppretter RotPosScaleIntepolator
-		rotPosScale[i] = makeRotPosTingen(shapeMove[i]);
+		rotPosScale[i] = makeRotPosTingen(shapeMove[i], i);
 		shapeMove[i].addChild(rotPosScale[i]);
 
 		// Oppretter Behavior
-		behave[i] = new CaseBehavior(shapes[i], shapeMove[i], rotPosScale[i], rotator);
+		behave[i] = new CaseBehavior(shapes[i], shapeMove[i], 
+				rotPosScale[i], rotator, i);
 		behave[i].setSchedulingBounds(bounds);
 
 	}
@@ -437,9 +440,10 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		return quats;
 	}
 
-	public Point3f[] getRandomPositionsTilRotPos ()
+	public Point3f[] getRandomPositionsTilRotPos (int objectid)
 	{
 		double theta = Math.random()* 2 * Math.PI;
+		angles[objectid] = theta;
 
 		Point3f[] positions = new Point3f[5];
 		positions[0] = new Point3f(
@@ -472,7 +476,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		return scales;
 	}
 
-	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove)
+	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove, int i)
 	{
 
 		Alpha alpha = new Alpha(-1, 10000);
@@ -484,7 +488,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		axisOfRotPos.set(axis);
 
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
-				shapeMove, axisOfRotPos, getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(), getRotPosScales());
+				shapeMove, axisOfRotPos, getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(i), getRotPosScales());
 		rotPosScalePath.setSchedulingBounds(bounds);
 		
 		return rotPosScalePath;
@@ -522,13 +526,16 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		TransformGroup shapeMove;
 		RotPosScalePathInterpolator rotPos;
 		boolean passed_zero = false;
+		int objectid;
 
-		public CaseBehavior (Primitive shape, TransformGroup shapeMove, RotPosScalePathInterpolator ting, TransformGroup rotator)
-		{
+		public CaseBehavior(Primitive shape, TransformGroup shapeMove,
+				RotPosScalePathInterpolator ting, TransformGroup rotator,
+				int i) {
 			this.shape = shape;
 			this.shapeMove = shapeMove;
 			this.rotPos = ting;
 			this.rotator = rotator;
+			this.objectid = i;
 		}
 
 		@Override
@@ -562,7 +569,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 					shape.setAppearance(createAppearance(shapeType));
 
 					// Set new path
-					rotPos.setPathArrays(getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(), getRotPosScales());
+					rotPos.setPathArrays(getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(objectid), getRotPosScales());
 
 					passed_zero = false;
 				}
@@ -574,6 +581,50 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 
 			// Time for testing purpose
 			wakeupOn(new WakeupOnElapsedTime(50));
+		}
+		
+		public void goToCenter ()
+		{
+			// Setter ny bane
+			float[] knots = { 0.0f, 0.7f, 0.8f, 1.0f };
+			
+			Quat4f[] quats = new Quat4f[4];
+			quats[0] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
+			quats[1] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
+			quats[2] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
+			quats[3] = new Quat4f(0.0f, 0.0f, 0.0f, 0.0f);
+			
+			double theta = angles[objectid];
+			
+			Point3f[] positions = new Point3f[4];
+			positions[0] = new Point3f(
+					0.0f,
+					0.0f, 
+					-1.0f);
+			positions[1] = new Point3f(
+					0.0f,
+					0.0f, 
+					-1.0f);
+			positions[2] = new Point3f(
+					(float) (avstand_indre * Math.cos(theta)),
+					(float) (avstand_indre * Math.sin(theta)),
+					-1.0f);
+			positions[3] = new Point3f(
+					(float) (avstand_ytre * Math.cos(theta)),
+					(float) (avstand_ytre * Math.sin(theta)),
+					-1.0f);
+			float[] scales = {3f, 3f, 0.4f, 0.4f};
+			rotPos.setPathArrays(
+					knots, 
+					quats,
+					positions, 
+					scales
+				);
+		}
+
+		@Override
+		void click() {
+			goToCenter();
 		}
 	}
 	
@@ -599,6 +650,10 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 
 			// Time for testing purpose
 			wakeupOn(new WakeupOnElapsedTime((int)(1000/30)));
+		}
+
+		@Override
+		void click() {
 		}
 
 	}
@@ -643,13 +698,16 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 		}
 		
-		public void rotateStop()
+		public void rotateStop(Point mouseStop)
 		{
+			if(mouseStop.equals(mouseStart))
+				click();
 			//System.out.println("rotateStop: " + shape.toString());
 			behaveRotating.remove(this);
 			mouseStart = null;
 		}
 		
+		abstract void click();
 	}
 	
 	public Appearance createCamAppearance() {
@@ -953,16 +1011,23 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	}
 
 	@Override
-	public void mouseClicked(java.awt.event.MouseEvent mouseEvent) {
-		System.out.println("Picking:D");
+	public void mouseClicked(MouseEvent mouseEvent) {
 		pc.setShapeLocation(mouseEvent);
 		PickResult[] results = pc.pickAll();
 		for (int i = 0; (results != null) && (i < results.length); i++) {
-			Node node = results[i].getObject();
-			if (node instanceof Shape3D) {
-				System.out.println("clicked: " + node.toString());
+			Node node = results[i].getObject().getParent();
+			if (node instanceof Primitive) {
 				if(node == webcamBox){
 					captureImage();
+				} else {
+					for (int j = 0; j < shapes.length; j++)
+					{
+						if(node == shapes[j])
+						{
+							// Start rotation in this point
+							behave[j].click();
+						}
+					}
 				}
 			}
 		}
@@ -1014,7 +1079,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		if(behaveRotating.size() > 0)
 		{
 			for (int i = 0; i < behaveRotating.size(); i++) {
-				behaveRotating.get(i).rotateStop();
+				behaveRotating.get(i).rotateStop(arg0.getPoint());
 			}
 		}
 	}
