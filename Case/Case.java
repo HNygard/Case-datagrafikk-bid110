@@ -526,6 +526,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		return rotPosScalePath;
 	}
 	
+	
 	public GeometryArray getGeometry(int shapeType)
 	{
 
@@ -534,7 +535,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		int[] indices;
 		
 		double scale;
-
+		
 		if (shapeType == 0) {
 
 			double l = Math.random() * 0.4;
@@ -583,8 +584,9 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 			indices[23] = 5;
 			
 		}
+		
 		//else if (shapeType == 1)
-		else
+		else  
 		{
 			gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
 			double phi = 0.5 * (Math.sqrt(5) + 1);
@@ -705,6 +707,7 @@ public class Case extends JFrame implements KeyListener, MouseListener {
 		ng.generateNormals(gi);
 		return gi.getGeometryArray();
 	}
+	
 	
 	public Appearance createAppearance(int shapeType) {
 		Appearance appear = new Appearance();
