@@ -1,9 +1,20 @@
 package Case;
 
+/**
+ * Oppgave i Datagrafikk ved Universitet i Stavanger
+ * Gjennomført av Gunnstein, Hallvard og Stefan
+ * 
+ * Noe kode hentet fra http://github.com/hnJaermuseet/Webcam-capture-and-fade
+ * 
+ * Lisens på programmet:
+ * CC-BY-SA: Creative Commons Attribution-Share Alike 3.0 Norway License
+ * http://creativecommons.org/licenses/by-sa/3.0/no/
+ * 
+ * @author Gunnstein, Hallvard og Stefan
+ */
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.vecmath.*;
 
 import java.awt.*;
@@ -15,7 +26,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.media.Buffer;
 import javax.media.CaptureDeviceInfo;
@@ -32,30 +42,28 @@ import javax.media.util.BufferToImage;
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
-import com.sun.j3d.utils.picking.behaviors.PickRotateBehavior;
 import com.sun.j3d.utils.universe.*;
-import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.image.TextureLoader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Vector;
-/*
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
- */
 
 public class Case extends JFrame implements KeyListener, MouseListener, MouseMotionListener {
 	public static void main(String[] s) {
-
+		
+		JOptionPane.showMessageDialog(null, "Noen funksjoner:\n" +
+				"Klikk for å gjøre bildeboks stor\n" +
+				"Klikk og dra for å rotere\n" +
+				"Klikk på kameraboks for å ta bilde \n\n" +
+				"Må ha Java Media Framework med fungerende innstillinger for webcam\n" +
+				"for å kunne vise kamera i programmet");
 
 		// Getting save directory
 		String saveDir;
@@ -93,7 +101,6 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		images_lastadded = new ArrayList<Integer>();
 		images_nevershown = new ArrayList<Integer>();
 		
-		System.out.println(CaptureDeviceManager.getDeviceList(null).size());
 		Vector devices = (Vector) CaptureDeviceManager.getDeviceList(null).clone();
 		Enumeration enumeration = devices.elements();
 		System.out.println("- Available cameras -");
@@ -102,9 +109,9 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			CaptureDeviceInfo cdi = (CaptureDeviceInfo) enumeration.nextElement();
 			String name = cdi.getName();
-			System.out.println(name);
 			if (name.startsWith("vfw:"))
 			{
+				System.out.println(name);
 				names.add(name);
 			}
 		}
@@ -113,7 +120,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		//String str2 = "vfw:Microsoft WDM Image Capture (Win32):0";
 		if(names.size() == 0) {
 			JOptionPane.showMessageDialog(null, "Ingen kamera funnet. " +
-					"Du b�r koble til et kamera for � kj�re programmet optimalt.",
+					"Du b�r koble til et kamera for � kj�re programmet optimalt.",
 					"Feil",
 					JOptionPane.ERROR_MESSAGE); 
 			cameraFound = false;
@@ -152,13 +159,13 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 
 				player.start();
 				
-				if ((comp = player.getVisualComponent()) != null) {
+				/*if ((comp = player.getVisualComponent()) != null) {
 					add(comp, BorderLayout.EAST);
-				}
+				}*/
 			}
 			catch(javax.media.NoPlayerException e) 
 			{
-				 JOptionPane.showMessageDialog(null, "Klarer ikke � starte"+
+				 JOptionPane.showMessageDialog(null, "Klarer ikke � starte"+
 						 " kamera. Sjekk at det er koblet til.", 
 						 "IOException", 
 						 JOptionPane.ERROR_MESSAGE);
@@ -196,10 +203,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		// JFrame stuff
 		setTitle("Caseoppgave - Datagrafikk ved UiS - Hallvard, Gunnstein og Stefan");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-
-
+		
 		//setUndecorated(true);
 		pack();
 		setSize(800, 800);
@@ -268,23 +272,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		tr.setTranslation(new Vector3f(0.1f, 0.1f, 0.1f));
 		TransformGroup testTransform = new TransformGroup(tr);
 		testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-
-
-		// rotere enkelte objekter
-		/*testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-	    testTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-		MouseRotate rotator1 = new MouseRotate(testTransform);
-	    BoundingSphere bounds = new BoundingSphere();
-	    rotator1.setSchedulingBounds(bounds);
-	    testTransform.addChild(rotator1);
-		 */
-
-		PickRotateBehavior rotatorObjekt = new PickRotateBehavior(root, cv, bounds, 
-				PickTool.GEOMETRY);
-		root.addChild(rotatorObjekt);
-
-
-
+		
 		// Transform
 		root.addChild(testTransform);
 		
@@ -299,16 +287,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
 		ptlight.setInfluencingBounds(bounds);
 		root.addChild(ptlight);
-
-		/* Material */
-		material = new Material();
-
-		// temp
-		material.setAmbientColor(new Color3f(0f,0f,0f));
-		material.setDiffuseColor(new Color3f(0.15f,0.15f,0.25f));
-
-
-
+		
 		/* Making shapes from 0 to n */
 
 		// Make arrays
@@ -493,17 +472,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		
 		return rotPosScalePath;
 	}
-
-	/*public void getGeometry(int shapeType)
-	{
-		if (shapeType ==0){
-			newBox();
-		}
-		else {
-			newSphere();
-		}
-	}
-	*/
+	
 	public Appearance createAppearance(int shapeType) {
 		Appearance appear = new Appearance();
 		TextureLoader loader = new TextureLoader(getRandomImage(), this);
@@ -562,7 +531,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 					int shapeType = (int)(Math.random()*2);
 
 					// Get random geometry
-					//TODO: M� fikses
+					//TODO: Må fikses
 					//shape.setGeometry(getGeometry(shapeType));
 
 					// Get new appearance (new image/texture)
@@ -715,21 +684,13 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		
 		TextureLoader loader = new TextureLoader(getCamImage(), this);
 		ImageComponent2D image = loader.getImage();
-
-
 		
-
 		Texture2D texture = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
 				image.getWidth(), image.getHeight());
 		texture.setImage(0, image);
 		texture.setEnable(true);
 		texture.setMagFilter(texture.BASE_LEVEL_LINEAR);
 		texture.setMinFilter(texture.BASE_LEVEL_LINEAR);
-		/*
-		appear.setMaterial(material);
-		appear.setTransparencyAttributes(new TransparencyAttributes(
-				TransparencyAttributes.BLENDED, 0.0f));
-		*/
 		appear.setTexture(texture); 
 
 		return appear;
@@ -1035,14 +996,10 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
