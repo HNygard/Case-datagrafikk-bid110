@@ -212,6 +212,9 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	float             avstand_ytre  = 0.5f*5;
 	float             avstand_indre = 0.2f*5;
 	float             avstand_buffer = 0.5f;
+	
+	long timeNext = 0;
+	long timeBetween = 3000;
 
 	// Other stuff
 	PickCanvas        pc;
@@ -253,7 +256,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	Primitive webcamBox;
 
 	private BranchGroup createSceneGraph(Canvas3D cv) {
-		int n = 5;
+		int n = 3;
 
 		/* root */
 		BranchGroup root = new BranchGroup();
@@ -281,16 +284,11 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 
 
 
-		//Spin
+		// Transform
 		root.addChild(testTransform);
-		Alpha alpha = new Alpha(0, 8000);
-		RotationInterpolator rotator = new RotationInterpolator(alpha, testTransform);
-		rotator.setSchedulingBounds(bounds);
-		testTransform.addChild(rotator);
-
+		
 		/* background and lights */
-		Background background = new Background(1.0f, 1.0f, 1.0f);
-		//Background background = new Background(0f, 0f, 0f);
+		Background background = new Background(0.0f, 0.0f, 0.0f);
 		background.setApplicationBounds(bounds);
 		root.addChild(background);
 		AmbientLight light = new AmbientLight(true, new Color3f(Color.white));
@@ -346,50 +344,6 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		
 		testTransform.addChild(wbTransform);
 		
-		/*
-		SharedGroup sg = new SharedGroup();
-		// object
-		for (int i = 0; i < n; i++) {
-			Transform3D tr1 = new Transform3D();
-			tr1.setRotation(new AxisAngle4d(0, 1, 0, 2 * Math.PI
-		 * ((double) i / n)));
-			TransformGroup tgNew = new TransformGroup(tr1);
-			Link link = new Link();
-			link.setSharedGroup(sg);
-			tgNew.addChild(link);
-			tg.addChild(tgNew);
-
-		}*/
-
-		/*
-		Shape3D torus1 = new Torus(0.1, 0.7);
-		Appearance ap = new Appearance();
-		ap.setMaterial(new Material());
-		torus1.setAppearance(ap);
-		tg.addChild(torus1);
-
-		Shape3D torus2 = new Torus(0.1, 0.4);
-		ap = new Appearance();
-		ap.setMaterial(new Material());
-		ap.setTransparencyAttributes(new TransparencyAttributes(
-				TransparencyAttributes.BLENDED, 0.0f));
-		torus2.setAppearance(ap);
-		Transform3D tr2 = new Transform3D();
-		tr2.setRotation(new AxisAngle4d(1, 0, 0, Math.PI / 2));
-		tr2.setTranslation(new Vector3d(0.8, 0, 0));
-
-		TransformGroup tg2 = new TransformGroup(tr2);
-		tg2.addChild(torus2);
-		 */
-
-		// SharedGroup
-		/*
-		sg.addChild(tg2);
-		Alpha alpha = new Alpha(0, 8000);
-		RotationInterpolator rotator = new RotationInterpolator(alpha, spin);
-		rotator.setSchedulingBounds(bounds);
-		spin.addChild(rotator);
-		 */
 
 		return root;
 	}
@@ -421,29 +375,28 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	public Primitive makeShape ()
 	{
+		Primitive shape = null;
 		int shapeType = (int)(Math.random()*2);
-		Appearance ap = createAppearance(shapeType);
-		Primitive shape = new Box(
-				(float) (0.4),
-				(float) (0.4),
-				(float) (0.4),
-				Primitive.ENABLE_GEOMETRY_PICKING |
-				Primitive.ENABLE_APPEARANCE_MODIFY |
-				Primitive.GENERATE_NORMALS |
-				Primitive.GENERATE_TEXTURE_COORDS,ap);
-
-		//Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
-
-		/*
-		Primitive shape = new Primitive(getGeometry(shapeType), ap);
-		PickTool.setCapabilities(shape, PickTool.INTERSECT_FULL);
-		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
-		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-		shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
-
-		shape.setAppearance(ap);
-		 */
+		if (shapeType == 0){
+			Appearance ap = createAppearance(shapeType);
+			shape = new Box(
+					(float) (0.4),
+					(float) (0.4),
+					(float) (0.4),
+					Primitive.ENABLE_GEOMETRY_PICKING |
+					Primitive.ENABLE_APPEARANCE_MODIFY |
+					Primitive.GENERATE_NORMALS |
+					Primitive.GENERATE_TEXTURE_COORDS,ap);
+		}
+		else{
+			Appearance ap = createAppearance(shapeType);
+			shape = new Sphere(
+					(float)0.3,
+					Primitive.ENABLE_GEOMETRY_PICKING |
+					Primitive.ENABLE_APPEARANCE_MODIFY |
+					Primitive.GENERATE_NORMALS |
+					Primitive.GENERATE_TEXTURE_COORDS,ap);
+		}
 		return shape;
 	}
 
@@ -522,7 +475,9 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 	public RotPosScalePathInterpolator makeRotPosTingen(TransformGroup shapeMove)
 	{
 
-		Alpha alpha = new Alpha(-1, 8000);
+		Alpha alpha = new Alpha(-1, 10000);
+		alpha.setStartTime(System.currentTimeMillis()+(long)timeNext);
+		timeNext += timeBetween;
 		Transform3D axisOfRotPos = new Transform3D();
 
 		AxisAngle4f axis = new AxisAngle4f(1.0f, 0.0f, 0.0f, 0.0f);
@@ -531,7 +486,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		RotPosScalePathInterpolator rotPosScalePath = new RotPosScalePathInterpolator(alpha,
 				shapeMove, axisOfRotPos, getRotPosKnots(), getRotPosQuats(), getRandomPositionsTilRotPos(), getRotPosScales());
 		rotPosScalePath.setSchedulingBounds(bounds);
-
+		
 		return rotPosScalePath;
 	}
 
@@ -889,7 +844,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			return (BufferedImage)getNoCamImage();
 		}
-
+		
 		// Grab a frame
 		FrameGrabbingControl fgc = (FrameGrabbingControl) player
 		.getControl("javax.media.control.FrameGrabbingControl");
