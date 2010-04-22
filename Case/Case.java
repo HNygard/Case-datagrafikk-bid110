@@ -289,7 +289,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		testTransform.addChild(rotator);
 
 		/* background and lights */
-		Background background = new Background(1.0f, 1.0f, 1.0f);
+		Background background = new Background(0.0f, 0.0f, 0.0f);
 		//Background background = new Background(0f, 0f, 0f);
 		background.setApplicationBounds(bounds);
 		root.addChild(background);
