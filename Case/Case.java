@@ -289,7 +289,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		testTransform.addChild(rotator);
 
 		/* background and lights */
-		Background background = new Background(1.0f, 1.0f, 1.0f);
+		Background background = new Background(0.0f, 0.0f, 0.0f);
 		//Background background = new Background(0f, 0f, 0f);
 		background.setApplicationBounds(bounds);
 		root.addChild(background);
@@ -421,29 +421,29 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	public Primitive makeShape ()
 	{
+		Primitive shape = null;
 		int shapeType = (int)(Math.random()*2);
-		Appearance ap = createAppearance(shapeType);
-		Primitive shape = new Box(
-				(float) (0.4),
-				(float) (0.4),
-				(float) (0.4),
-				Primitive.ENABLE_GEOMETRY_PICKING |
-				Primitive.ENABLE_APPEARANCE_MODIFY |
-				Primitive.GENERATE_NORMALS |
-				Primitive.GENERATE_TEXTURE_COORDS,ap);
-
-		//Sphere shape = new Sphere(0.7f, Primitive.GENERATE_TEXTURE_COORDS, 50, ap);
-
-		/*
-		Primitive shape = new Primitive(getGeometry(shapeType), ap);
-		PickTool.setCapabilities(shape, PickTool.INTERSECT_FULL);
-		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
-		shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-		shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
-
-		shape.setAppearance(ap);
-		 */
+		System.out.println(shapeType);
+		if (shapeType == 0){
+			Appearance ap = createAppearance(shapeType);
+			shape = new Box(
+					(float) (0.4),
+					(float) (0.4),
+					(float) (0.4),
+					Primitive.ENABLE_GEOMETRY_PICKING |
+					Primitive.ENABLE_APPEARANCE_MODIFY |
+					Primitive.GENERATE_NORMALS |
+					Primitive.GENERATE_TEXTURE_COORDS,ap);
+		}
+		else{
+			Appearance ap = createAppearance(shapeType);
+			shape = new Sphere(
+					(float)0.3,
+					Primitive.ENABLE_GEOMETRY_PICKING |
+					Primitive.ENABLE_APPEARANCE_MODIFY |
+					Primitive.GENERATE_NORMALS |
+					Primitive.GENERATE_TEXTURE_COORDS,ap);
+		}
 		return shape;
 	}
 
@@ -889,7 +889,7 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			return (BufferedImage)getNoCamImage();
 		}
-
+		
 		// Grab a frame
 		FrameGrabbingControl fgc = (FrameGrabbingControl) player
 		.getControl("javax.media.control.FrameGrabbingControl");
