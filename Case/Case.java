@@ -92,8 +92,8 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		images_used = new ArrayList<Integer>();
 		images_lastadded = new ArrayList<Integer>();
 		images_nevershown = new ArrayList<Integer>();
-
-
+		
+		System.out.println(CaptureDeviceManager.getDeviceList(null).size());
 		Vector devices = (Vector) CaptureDeviceManager.getDeviceList(null).clone();
 		Enumeration enumeration = devices.elements();
 		System.out.println("- Available cameras -");
@@ -102,10 +102,10 @@ public class Case extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			CaptureDeviceInfo cdi = (CaptureDeviceInfo) enumeration.nextElement();
 			String name = cdi.getName();
+			System.out.println(name);
 			if (name.startsWith("vfw:"))
 			{
 				names.add(name);
-				System.out.println(name);
 			}
 		}
 
